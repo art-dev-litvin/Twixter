@@ -1,0 +1,60 @@
+name: CI/CD Workflow
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  # Frontend Job (React)
+  frontend:
+    runs-on: ubuntu-latest
+    working-directory: client # Set working directory to the React app
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: "16" # Or the version your project requires
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Build React app
+        run: npm run build
+
+      - name: Run tests
+        run: npm test
+
+  # Backend Job (NestJS Firebase Functions)
+  backend:
+    runs-on: ubuntu-latest
+    working-directory: server # Set working directory to the NestJS app
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: "16" # Or the version your project requires
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Build NestJS app
+        run: npm run build
+
+      - name: Deploy to Firebase
+        run: |
+          curl -sL https://firebase.tools | bash
+          firebase deploy --only functions
+        env:
+          FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
