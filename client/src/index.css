@@ -1,0 +1,9 @@
+@import url(https://fonts.googleapis.com/css?family=Poppins:regular,500,600,700);
+@import "tailwindcss";
+
+@theme {
+  --default-font-family: "Poppins";
+
+  /*--shadow-md: 0 0px 8px -1px var(--tw-shadow-color, rgb(0 0 0 / 0.1)),
+    0 0 6px -2px var(--tw-shadow-color, rgb(0 0 0 / 0.1));*/
+}

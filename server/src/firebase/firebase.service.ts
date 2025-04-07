@@ -28,7 +28,7 @@ export class FirebaseService {
         clientEmail: serviceAccount.client_email,
       };
 
-      admin.initializeApp({
+      this.firebaseApp = admin.initializeApp({
         credential: admin.credential.cert(adminConfig),
         databaseURL: `https://${adminConfig.projectId}.firebaseio.com`,
       });
