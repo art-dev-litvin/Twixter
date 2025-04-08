@@ -10,7 +10,11 @@ function Avatar({ size = 50, src }: AvatarProps) {
     <div
       style={{ width: size, height: size }}
       className="bg-white rounded-full flex justify-center items-center overflow-hidden border-2 border-slate-500">
-      {src ? <img src={src} alt="" /> : <UserIcon />}
+      {src ? (
+        <img className="size-full object-cover" src={src} alt="" />
+      ) : (
+        <UserIcon />
+      )}
     </div>
   );
 }

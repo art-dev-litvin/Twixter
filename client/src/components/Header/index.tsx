@@ -27,7 +27,7 @@ function Header() {
               <p>
                 Welcome, <span className="font-bold">{user.displayName}</span>
               </p>
-              <Avatar />
+              <Avatar src={user.photoURL || undefined} />
             </>
           ) : (
             <>

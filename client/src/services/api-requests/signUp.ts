@@ -1,4 +1,4 @@
-import axios, { AxiosError } from "axios";
+import axios from "axios";
 import { auth } from "../firebase";
 import {
   sendEmailVerification,
@@ -6,6 +6,7 @@ import {
   User,
 } from "firebase/auth";
 import { apiPaths } from "../../constants/api-paths";
+import { getErrorMessage } from "../../utils/getErrorMessage";
 
 const signUp = async (
   username: string,
@@ -29,13 +30,7 @@ const signUp = async (
       user: loggedInUser,
     };
   } catch (error) {
-    if (error instanceof AxiosError) {
-      return { error: error.response?.data?.message };
-    } else if (error instanceof Error) {
-      return { error: error.message };
-    } else {
-      return { error: "Unexpected error occurred" };
-    }
+    return getErrorMessage(error);
   }
 };
 

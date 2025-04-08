@@ -6,7 +6,7 @@ import { CreateUserDto } from './dtos/createUser.dto';
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
-  @Post()
+  @Post('/signup')
   async createUser(@Body() body: CreateUserDto) {
     const { email, password, username } = body;
 
