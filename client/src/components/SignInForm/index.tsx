@@ -6,6 +6,7 @@ import { SignInSchema } from "./schema";
 import { signIn } from "../../services/api-requests/signIn";
 import { toast } from "react-toastify";
 import { routes } from "../../constants/routes";
+import Button from "../Button";
 
 function SignInForm() {
   const navigate = useNavigate();
@@ -70,17 +71,9 @@ function SignInForm() {
         )}
       </FormField>
 
-      <button
-        type="submit"
-        disabled={isSubmitting}
-        className={`w-full mt-7 py-2 px-4 rounded-md text-white font-medium
-      ${
-        isSubmitting
-          ? "bg-gray-400 cursor-not-allowed"
-          : "bg-emerald-500 hover:bg-emerald-600"
-      } transition-colors duration-200`}>
+      <Button className="mt-4" type="submit" fullWidth disabled={isSubmitting}>
         {isSubmitting ? "Submitting..." : "Sign In"}
-      </button>
+      </Button>
     </form>
   );
 }

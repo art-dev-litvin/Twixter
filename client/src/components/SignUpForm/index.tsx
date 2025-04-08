@@ -6,6 +6,7 @@ import { useNavigate } from "react-router-dom";
 import { routes } from "../../constants/routes";
 import { signUp } from "../../services/api-requests/signUp";
 import FormField from "../FormField";
+import Button from "../Button";
 
 function SignUpForm() {
   const navigate = useNavigate();
@@ -89,17 +90,9 @@ function SignUpForm() {
         )}
       </FormField>
 
-      <button
-        type="submit"
-        disabled={isSubmitting}
-        className={`w-full mt-7 py-2 px-4 rounded-md text-white font-medium
-          ${
-            isSubmitting
-              ? "bg-gray-400 cursor-not-allowed"
-              : "bg-emerald-500 hover:bg-emerald-600"
-          } transition-colors duration-200`}>
+      <Button className="mt-4" fullWidth type="submit" disabled={isSubmitting}>
         {isSubmitting ? "Submitting..." : "Sign Up"}
-      </button>
+      </Button>
     </form>
   );
 }
