@@ -3,4 +3,6 @@ import { AuthContextType } from "./Auth.types";
 
 export const AuthContext = React.createContext<AuthContextType>({
   user: null,
+  isSignedOut: false,
+  setIsSignedOut: () => {},
 });

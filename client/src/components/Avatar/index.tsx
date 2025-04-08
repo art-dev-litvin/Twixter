@@ -13,7 +13,7 @@ function Avatar({ size = 50, src }: AvatarProps) {
       {src ? (
         <img className="size-full object-cover" src={src} alt="" />
       ) : (
-        <UserIcon />
+        <UserIcon className="size-[60%]" />
       )}
     </div>
   );

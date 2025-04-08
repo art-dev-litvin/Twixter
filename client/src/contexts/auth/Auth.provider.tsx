@@ -6,12 +6,14 @@ import { onAuthStateChanged, User } from "firebase/auth";
 
 export function AuthProvider({ children }: AuthProviderProps) {
   const [user, setUser] = React.useState<User | null>(null);
+  const [isSignedOut, setIsSignedOut] = React.useState(false);
 
   React.useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
       if (firebaseUser) {
         setUser(firebaseUser);
       } else {
+        setIsSignedOut(true);
         setUser(null);
       }
     });
@@ -19,6 +21,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
   }, []);
 
   return (
-    <AuthContext.Provider value={{ user }}>{children}</AuthContext.Provider>
+    <AuthContext.Provider value={{ user, isSignedOut, setIsSignedOut }}>
+      {children}
+    </AuthContext.Provider>
   );
 }
