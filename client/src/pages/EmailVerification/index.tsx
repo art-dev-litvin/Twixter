@@ -22,9 +22,11 @@ function EmailVerification() {
           clearInterval(interval);
 
           navigate(routes.home);
-          toast.success("Email verified successfuly!");
+          toast.success("Email verified successfully!");
         }
       }, 2000);
+
+      return () => clearInterval(interval);
     }
   }, [user, navigate]);
 

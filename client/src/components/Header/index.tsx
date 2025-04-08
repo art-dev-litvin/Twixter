@@ -2,6 +2,7 @@ import { routes } from "../../constants/routes";
 import { useAuth } from "../../contexts/auth/Auth.hook";
 import Avatar from "../Avatar";
 import NavLink from "../NavLink";
+import SignOutButton from "../SignOutButton";
 
 function Header() {
   const { user } = useAuth();
@@ -17,7 +18,7 @@ function Header() {
         <nav className="grow">
           <ul>
             <li>
-              <NavLink to="#">Profile</NavLink>
+              <NavLink to={routes.profile}>Profile</NavLink>
             </li>
           </ul>
         </nav>
@@ -25,9 +26,10 @@ function Header() {
           {user ? (
             <>
               <p>
-                Welcome, <span className="font-bold">{user.displayName}</span>
+                <span className="font-bold">{user.displayName}</span>
               </p>
               <Avatar src={user.photoURL || undefined} />
+              <SignOutButton />
             </>
           ) : (
             <>
