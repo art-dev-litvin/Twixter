@@ -5,7 +5,7 @@ function EditProfile() {
   return (
     <>
       <Card>
-        <h2 className="text-2xl font-bold text-center mb-6">Sign Up</h2>
+        <h2 className="text-2xl font-bold text-center mb-6">Edit profile</h2>
         <EditUserForm />
       </Card>
     </>

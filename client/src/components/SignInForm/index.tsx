@@ -21,8 +21,8 @@ function SignInForm() {
     touched,
   } = useFormik<SignInFormValues>({
     initialValues: {
-      email: "test@gmail.com",
-      password: "helloworld123",
+      email: "",
+      password: "",
     },
     validationSchema: SignInSchema,
     onSubmit: async (values, { setSubmitting }) => {
@@ -60,6 +60,7 @@ function SignInForm() {
       <FormField className="mt-4">
         <FormField.Label htmlFor="password">Password</FormField.Label>
         <FormField.Input
+          type="password"
           value={values.password}
           onChange={handleChange}
           onBlur={handleBlur}

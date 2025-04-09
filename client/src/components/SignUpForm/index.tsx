@@ -21,9 +21,9 @@ function SignUpForm() {
     touched,
   } = useFormik<SignUpFormValues>({
     initialValues: {
-      username: "Username",
-      email: "test@gmail.com",
-      password: "helloworld123",
+      username: "",
+      email: "",
+      password: "",
     },
     validationSchema: SignUpSchema,
     onSubmit: async (values, { setSubmitting }) => {
@@ -79,6 +79,7 @@ function SignUpForm() {
       <FormField className="mt-4">
         <FormField.Label htmlFor="password">Password</FormField.Label>
         <FormField.Input
+          type="password"
           value={values.password}
           onChange={handleChange}
           onBlur={handleBlur}
