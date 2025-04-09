@@ -1,15 +1,20 @@
+import React from "react";
 import { useFormik } from "formik";
-import { EditUserFieldsValues, EditUserSchema } from "./schema";
-//import { toast } from "react-toastify";
-//import { useNavigate } from "react-router-dom";
-//import { routes } from "../../constants/routes";
+import { toast } from "react-toastify";
+import { useNavigate } from "react-router-dom";
 import FormField from "../FormField";
 import Button from "../Button";
+import { routes } from "../../constants/routes";
+import { useAuth } from "../../contexts/auth/Auth.hook";
+import { updateUser } from "../../services/api-requests/updateUser";
+import { EditUserFieldsValues, EditUserSchema } from "./schema";
 
 function EditUserForm() {
-  //const navigate = useNavigate();
+  const { user, setUser } = useAuth();
+  const navigate = useNavigate();
 
   const {
+    setValues,
     isSubmitting,
     handleSubmit,
     values,
@@ -19,23 +24,47 @@ function EditUserForm() {
     touched,
   } = useFormik<EditUserFieldsValues>({
     initialValues: {
-      username: "",
-      oldPassword: "",
+      username: user?.displayName || "",
       newPassword: "",
+      confirmNewPassword: "",
     },
     validationSchema: EditUserSchema,
-    onSubmit: async (/*values, { setSubmitting }*/) => {
-      console.log("submitted");
-      //setSubmitting(false);
-      //if (error) {
-      //  toast.error(error);
-      //}
-      //if (user) {
-      //  toast.success("Sign up successful!");
-      //  navigate(routes.emailVerification);
-      //}
+    onSubmit: async (values, { setSubmitting }) => {
+      const data = await updateUser({
+        username: values.username,
+        newPassword: values.newPassword,
+      });
+
+      setSubmitting(false);
+
+      if ("error" in data) {
+        toast.error(data.error);
+      } else {
+        toast.success(data.result);
+
+        setUser({
+          ...data.updatedUser,
+        });
+        navigate(routes.profile);
+      }
     },
   });
+
+  React.useEffect(() => {
+    setValues({
+      username: user?.displayName || "",
+      newPassword: "",
+      confirmNewPassword: "",
+    });
+  }, [user, setValues]);
+
+  if (!user) {
+    return (
+      <div>
+        <h1>Error, you need to login first!</h1>
+      </div>
+    );
+  }
 
   return (
     <form onSubmit={handleSubmit}>
@@ -54,22 +83,9 @@ function EditUserForm() {
       </FormField>
 
       <FormField className="mt-4">
-        <FormField.Label htmlFor="password">Old password</FormField.Label>
-        <FormField.Input
-          value={values.oldPassword}
-          onChange={handleChange}
-          onBlur={handleBlur}
-          id="oldPassword"
-          name="oldPassword"
-        />
-        {touched.oldPassword && errors.oldPassword && (
-          <FormField.Error>{errors.oldPassword}</FormField.Error>
-        )}
-      </FormField>
-
-      <FormField className="mt-4">
         <FormField.Label htmlFor="password">New password</FormField.Label>
         <FormField.Input
+          type="password"
           value={values.newPassword}
           onChange={handleChange}
           onBlur={handleBlur}
@@ -78,6 +94,23 @@ function EditUserForm() {
         />
         {touched.newPassword && errors.newPassword && (
           <FormField.Error>{errors.newPassword}</FormField.Error>
+        )}
+      </FormField>
+
+      <FormField className="mt-4">
+        <FormField.Label htmlFor="password">
+          Confirm new password
+        </FormField.Label>
+        <FormField.Input
+          type="password"
+          value={values.confirmNewPassword}
+          onChange={handleChange}
+          onBlur={handleBlur}
+          id="confirmNewPassword"
+          name="confirmNewPassword"
+        />
+        {touched.confirmNewPassword && errors.confirmNewPassword && (
+          <FormField.Error>{errors.confirmNewPassword}</FormField.Error>
         )}
       </FormField>
 
