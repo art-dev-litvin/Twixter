@@ -7,6 +7,7 @@ import Header from "./components/Header";
 import { ToastContainer } from "react-toastify";
 import EmailVerification from "./pages/EmailVerification";
 import Profile from "./pages/Profile";
+import EditProfile from "./pages/EditProfile";
 
 function App() {
   return (
@@ -16,6 +17,7 @@ function App() {
         <Routes>
           <Route path={routes.home} element={<Home />} />
           <Route path={routes.profile} element={<Profile />} />
+          <Route path={routes.editProfile} element={<EditProfile />} />
           <Route path={routes.signUp} element={<SignUp />} />
           <Route
             path={routes.emailVerification}
