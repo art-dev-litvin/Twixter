@@ -5,17 +5,6 @@ import { FirebaseService } from 'src/firebase/firebase.service';
 export class AuthService {
   constructor(private readonly firebaseService: FirebaseService) {}
 
-  async getUserByUid(uid: string) {
-    const user = await this.firebaseService.getAuth().getUser(uid);
-
-    return {
-      uid: user.uid,
-      email: user.email,
-      displayName: user.displayName,
-      emailVerified: user.emailVerified,
-    };
-  }
-
   async createUser(email: string, password: string, username: string) {
     try {
       const auth = this.firebaseService.getAuth();
