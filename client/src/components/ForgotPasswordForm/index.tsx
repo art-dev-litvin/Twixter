@@ -1,15 +1,13 @@
 import FormField from "../FormField";
 import { useNavigate } from "react-router-dom";
 import { useFormik } from "formik";
-import { SignInFormValues } from "./types";
-import { SignInSchema } from "./schema";
-import { signIn } from "../../services/api-requests/signIn";
+import { ForgotPasswordSchema, ForgotPasswordFields } from "./schema";
 import { toast } from "react-toastify";
 import { routes } from "../../constants/routes";
 import Button from "../Button";
-import ForgotPasswordLink from "../ForgotPasswordLink";
+import { handleForgotPassword } from "../../services/api-requests/handleForgotPassword";
 
-function SignInForm() {
+function ForgotPasswordForm() {
   const navigate = useNavigate();
 
   const {
@@ -20,23 +18,20 @@ function SignInForm() {
     handleBlur,
     errors,
     touched,
-  } = useFormik<SignInFormValues>({
+  } = useFormik<ForgotPasswordFields>({
     initialValues: {
       email: "",
-      password: "",
     },
-    validationSchema: SignInSchema,
+    validationSchema: ForgotPasswordSchema,
     onSubmit: async (values, { setSubmitting }) => {
-      const { user, error } = await signIn(values.email, values.password);
+      const res = await handleForgotPassword(values.email);
 
       setSubmitting(false);
 
-      if (error) {
-        toast.error(error);
-      }
-
-      if (user) {
-        toast.success("Sign in successful!");
+      if ("error" in res) {
+        toast.error(res.error);
+      } else {
+        toast.success(res.result);
         navigate(routes.home);
       }
     },
@@ -58,28 +53,11 @@ function SignInForm() {
         )}
       </FormField>
 
-      <FormField className="mt-4">
-        <FormField.Label htmlFor="password">Password</FormField.Label>
-        <FormField.Input
-          type="password"
-          value={values.password}
-          onChange={handleChange}
-          onBlur={handleBlur}
-          id="password"
-          name="password"
-        />
-        {touched.password && errors.password && (
-          <FormField.Error>{errors.password}</FormField.Error>
-        )}
-      </FormField>
-
-      <ForgotPasswordLink />
-
       <Button className="mt-4" type="submit" fullWidth disabled={isSubmitting}>
-        {isSubmitting ? "Submitting..." : "Sign In"}
+        {isSubmitting ? "Submitting..." : "Send reset password email"}
       </Button>
     </form>
   );
 }
 
-export default SignInForm;
+export default ForgotPasswordForm;

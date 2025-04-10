@@ -1,20 +1,19 @@
 import classNames from "classnames";
-import React from "react";
-import { Link } from "react-router-dom";
+import { Link, LinkProps } from "react-router-dom";
 
-interface NavLinkProps {
-  to: string;
-  children: React.ReactNode;
+interface NavLinkProps extends LinkProps {
   disableHoverUnderline?: boolean;
 }
 
-function NavLink({ children, to, disableHoverUnderline }: NavLinkProps) {
+function NavLink({ className, disableHoverUnderline, ...props }: NavLinkProps) {
   return (
     <Link
-      className={classNames({ "hover:underline": !disableHoverUnderline })}
-      to={to}>
-      {children}
-    </Link>
+      className={classNames(
+        { "hover:underline": !disableHoverUnderline },
+        className
+      )}
+      {...props}
+    />
   );
 }
 

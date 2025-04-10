@@ -5,4 +5,5 @@ export const routes = {
   emailVerification: "/email-verification",
   profile: "/profile",
   editProfile: "/profile/edit",
+  forgotPassword: "/forgot-password",
 };
