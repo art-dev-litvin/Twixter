@@ -1,42 +1,41 @@
-import { updatePassword, updateProfile, User } from "firebase/auth";
-import { auth } from "../firebase";
-import { FirebaseError } from "firebase/app";
+import { User } from "firebase/auth";
+import axios from "axios";
+import { apiPaths } from "../../constants/api-paths";
+import { fileToBase64 } from "../../utils/fileToBase64";
+import { getErrorMessage } from "../../utils/getErrorMessage";
 
 const updateUser = async ({
   username,
   newPassword,
+  profileImage,
+  uid,
 }: {
   username?: string;
   newPassword?: string;
+  profileImage?: File;
+  uid: string;
 }): Promise<{ result: string; updatedUser: User } | { error: string }> => {
-  const user = auth.currentUser;
+  let profileImageBase64: string | undefined;
 
-  if (user) {
-    try {
-      await updateProfile(user, {
-        displayName: username || user.displayName,
-      });
-
-      if (newPassword) {
-        await updatePassword(user, newPassword);
-      }
-
-      return { result: "Profile edited successfully!", updatedUser: user };
-    } catch (error) {
-      if (error instanceof FirebaseError) {
-        switch (error.code) {
-          case "auth/requires-recent-login":
-            return { error: "To change the password you should login again" };
-          default:
-            return { error: error.message };
-        }
-      } else if (error instanceof Error) {
-        return { error: error.message };
-      }
-    }
+  if (profileImage) {
+    profileImageBase64 = await fileToBase64(profileImage);
   }
 
-  return { error: "No user is currently signed in" };
+  try {
+    const { data } = await axios.post<{ result: string; updatedUser: User }>(
+      apiPaths.auth.updateProfile,
+      {
+        username,
+        newPassword,
+        profileImageBase64,
+        uid,
+      }
+    );
+
+    return { result: data.result, updatedUser: data.updatedUser };
+  } catch (error) {
+    return getErrorMessage(error);
+  }
 };
 
 export { updateUser };

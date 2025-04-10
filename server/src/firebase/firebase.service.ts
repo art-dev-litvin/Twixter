@@ -31,6 +31,7 @@ export class FirebaseService {
       this.firebaseApp = admin.initializeApp({
         credential: admin.credential.cert(adminConfig),
         databaseURL: `https://${adminConfig.projectId}.firebaseio.com`,
+        storageBucket: `gs://${adminConfig.projectId}.firebasestorage.app`,
       });
     } else {
       this.firebaseApp = admin.app();

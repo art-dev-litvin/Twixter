@@ -8,6 +8,7 @@ import { routes } from "../../constants/routes";
 import { useAuth } from "../../contexts/auth/Auth.hook";
 import { updateUser } from "../../services/api-requests/updateUser";
 import { EditUserFieldsValues, EditUserSchema } from "./schema";
+import Avatar from "../Avatar";
 
 function EditUserForm() {
   const { user, setUser } = useAuth();
@@ -16,6 +17,7 @@ function EditUserForm() {
   const {
     setValues,
     isSubmitting,
+    setSubmitting,
     handleSubmit,
     values,
     handleChange,
@@ -32,7 +34,8 @@ function EditUserForm() {
     onSubmit: async (values, { setSubmitting }) => {
       const data = await updateUser({
         username: values.username,
-        newPassword: values.newPassword,
+        newPassword: values.newPassword?.trim() || undefined,
+        uid: user!.uid,
       });
 
       setSubmitting(false);
@@ -66,8 +69,47 @@ function EditUserForm() {
     );
   }
 
+  const onChangeAvatar = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+
+    if (files) {
+      const newAvatar = files[0];
+
+      setSubmitting(true);
+
+      const data = await updateUser({
+        profileImage: newAvatar,
+        uid: user!.uid,
+      });
+
+      setSubmitting(false);
+
+      if ("error" in data) {
+        toast.error(data.error);
+      } else {
+        toast.success(data.result);
+
+        setUser({
+          ...data.updatedUser,
+        });
+      }
+    }
+  };
+
   return (
     <form onSubmit={handleSubmit}>
+      <div className="flex justify-center">
+        <label className="group relative cursor-pointer flex flex-col items-center gap-2 mb-4">
+          <Avatar src={user.photoURL || undefined} size={100} />
+          <span className="group-hover:underline">Choose new avatar</span>
+          <input
+            onChange={onChangeAvatar}
+            className="hidden"
+            type="file"
+            accept="image/*"
+          />
+        </label>
+      </div>
       <FormField>
         <FormField.Label htmlFor="username">Username</FormField.Label>
         <FormField.Input

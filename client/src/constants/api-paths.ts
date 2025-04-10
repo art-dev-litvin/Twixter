@@ -4,5 +4,6 @@ export const apiPaths = {
   auth: {
     signUp: BASE_URL + "/auth/signup", // POST
     signIn: BASE_URL + "/auth/signin", // POST
+    updateProfile: BASE_URL + "/auth/update-profile",
   },
 };
