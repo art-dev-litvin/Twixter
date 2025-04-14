@@ -1,3 +1,4 @@
+import NewPost from "../../components/NewPost";
 import Post from "../../components/Post";
 
 function Home() {
@@ -22,6 +23,9 @@ function Home() {
   return (
     <div>
       <h1 className="text-4xl text-center font-bold mb-6">Home page</h1>
+      <div className="mb-8">
+        <NewPost />
+      </div>
       <div>
         <Post {...mockPost} />
       </div>

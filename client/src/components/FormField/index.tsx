@@ -1,6 +1,7 @@
 import classNames from "classnames";
 import React from "react";
 import Input from "../Input";
+import Textarea from "../Textarea";
 
 function FormField({
   children,
@@ -36,6 +37,13 @@ FormField.Input = function ({
   ...props
 }: React.InputHTMLAttributes<HTMLInputElement>) {
   return <Input className={classNames(className)} {...props} />;
+};
+
+FormField.Textarea = function ({
+  className,
+  ...props
+}: React.TextareaHTMLAttributes<HTMLTextAreaElement>) {
+  return <Textarea className={classNames(className)} {...props} />;
 };
 
 FormField.Error = function ({
