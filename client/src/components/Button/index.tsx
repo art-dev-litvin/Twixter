@@ -2,12 +2,18 @@ import classNames from "classnames";
 import React from "react";
 import { Link } from "react-router-dom";
 
-type Variant = "green" | "gray" | "destructive" | "destructiveOutlined";
+type Variant =
+  | "green"
+  | "gray"
+  | "destructive"
+  | "destructiveOutlined"
+  | "transparent";
 
 interface BaseButtonProps {
   variant?: Variant;
   fullWidth?: boolean;
   className?: string;
+  isIconOnly?: boolean;
   children: React.ReactNode;
 }
 
@@ -21,6 +27,7 @@ type ButtonProps =
 const Button: React.FC<ButtonProps> = ({
   children,
   className,
+  isIconOnly,
   variant = "green",
   fullWidth,
   ...props
@@ -36,8 +43,10 @@ const Button: React.FC<ButtonProps> = ({
         variant === "destructive",
       "border-red-500 text-red-500 hover:[&:not(:disabled)]:bg-red-50":
         variant === "destructiveOutlined",
+      "bg-transparent text-black border-0": variant === "transparent",
       "w-full": fullWidth,
       "bg-gray-400 !cursor-not-allowed": (props as any).disabled,
+      "rounded-full !p-0 h-auto": isIconOnly,
     },
     className
   );
