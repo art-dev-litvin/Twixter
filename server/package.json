@@ -7,6 +7,7 @@
   "license": "UNLICENSED",
   "main": "dist/index.js",
   "scripts": {
+    "dev": "concurrently \"nest start --watch\" \"firebase serve --only functions\"",
     "build": " nest build",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "start": " nest start",
@@ -28,6 +29,7 @@
     "@nestjs/platform-express": "^11.0.12",
     "class-transformer": "^0.5.1",
     "class-validator": "^0.14.1",
+    "concurrently": "^9.1.2",
     "dotenv": "^16.4.7",
     "express": "^5.1.0",
     "firebase-admin": "^13.2.0",
