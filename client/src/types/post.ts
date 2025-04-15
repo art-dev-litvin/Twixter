@@ -8,9 +8,12 @@ export interface PostType {
   createdAt: string;
   userId: string;
   userDisplayName: string;
-  userPhotoURL?: string;
+  userPhotoUrl?: string;
   comments: Comment[];
   rating: Rating;
+
+  commentsCount: number;
+  likesCount: number;
 }
 
 type Comment = { user: User; text: string };
@@ -25,5 +28,5 @@ export interface CreatePostDto {
   imageBase64?: string;
   userDisplayName: string;
   userId: string;
-  userPhotoURL?: string;
+  userPhotoUrl?: string;
 }

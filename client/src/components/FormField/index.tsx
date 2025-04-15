@@ -32,12 +32,12 @@ FormField.Label = function ({
   );
 };
 
-FormField.Input = function ({
-  className,
-  ...props
-}: React.InputHTMLAttributes<HTMLInputElement>) {
-  return <Input className={classNames(className)} {...props} />;
-};
+FormField.Input = React.forwardRef<
+  HTMLInputElement,
+  React.InputHTMLAttributes<HTMLInputElement>
+>(function InputField({ className, ...props }, ref) {
+  return <Input ref={ref} className={classNames(className)} {...props} />;
+});
 
 FormField.Textarea = function ({
   className,

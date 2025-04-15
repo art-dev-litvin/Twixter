@@ -23,5 +23,5 @@ export class CreatePostDto {
 
   @IsString()
   @IsNotEmpty()
-  userPhotoURL?: string;
+  userPhotoUrl?: string;
 }

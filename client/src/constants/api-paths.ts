@@ -7,5 +7,6 @@ export const apiPaths = {
   },
   posts: {
     new: BASE_URL + "/posts/new", // POST
+    getAll: BASE_URL + "/posts",
   },
 };

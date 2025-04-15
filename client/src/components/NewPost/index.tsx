@@ -16,6 +16,7 @@ interface NewPostProps {
 function NewPost({ setPosts }: NewPostProps) {
   const [openPopup, setOpenPopup] = React.useState(false);
   const [isLoading, setIsLoading] = React.useState(false);
+  const imageFileInputRef = React.useRef<HTMLInputElement>(null);
 
   const formik = useFormik({
     initialValues: {
@@ -36,6 +37,12 @@ function NewPost({ setPosts }: NewPostProps) {
         toast.success("Post created!");
 
         formik.resetForm();
+
+        const imageFileInput = imageFileInputRef.current;
+        if (imageFileInput) {
+          imageFileInput.value = "";
+        }
+
         setOpenPopup(false);
       }
 
@@ -99,6 +106,7 @@ function NewPost({ setPosts }: NewPostProps) {
           <FormField>
             <FormField.Label htmlFor="imageBase64">Image</FormField.Label>
             <FormField.Input
+              ref={imageFileInputRef}
               type="file"
               id="imageBase64"
               name="imageBase64"

@@ -24,7 +24,7 @@ const createPost = async (
         imageBase64,
         userId: uid,
         userDisplayName: displayName || "Username",
-        userPhotoURL: photoURL || undefined,
+        userPhotoUrl: photoURL || undefined,
       });
 
       return newPost;

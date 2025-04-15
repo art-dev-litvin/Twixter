@@ -11,6 +11,9 @@ export interface PostType {
   userPhotoURL?: string;
   comments: Comment[];
   rating: Rating;
+
+  commentsCount: number;
+  likesCount: number;
 }
 
 type Comment = { user: UserRecord; text: string };

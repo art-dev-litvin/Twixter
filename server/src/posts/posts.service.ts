@@ -12,7 +12,7 @@ export class PostsService {
     imageBase64,
     userId,
     userDisplayName,
-    userPhotoURL,
+    userPhotoUrl,
   }: {
     title: string;
     content: string;
@@ -20,10 +20,10 @@ export class PostsService {
 
     userId: string;
     userDisplayName: string;
-    userPhotoURL?: string;
+    userPhotoUrl?: string;
   }) {
     try {
-      let imageURL: string | undefined;
+      let imageUrl: string | undefined;
 
       const newPostRef = admin.firestore().collection('posts').doc();
       const postId = newPostRef.id;
@@ -33,7 +33,7 @@ export class PostsService {
 
         const { mimeType, base64Data } = parseBase64Image(imageBase64);
 
-        imageURL = await uploadBase64ToFirebaseStorage(
+        imageUrl = await uploadBase64ToFirebaseStorage(
           base64Data,
           imagePath,
           mimeType,
@@ -45,12 +45,14 @@ export class PostsService {
         title,
         content,
         createdAt: new Date(),
-        ...(imageURL && { imageURL }),
-        ...(userPhotoURL && { userPhotoURL }),
+        ...(imageUrl && { imageUrl }),
+        ...(userPhotoUrl && { userPhotoUrl }),
         userId,
         userDisplayName,
         rating: { likes: 0, dislikes: 0 },
         comments: [],
+        commentsCount: 0,
+        likesCount: 0,
       };
 
       await newPostRef.set(newPost);
@@ -61,12 +63,47 @@ export class PostsService {
     }
   }
 
-  async getPosts() {
-    try {
-      const snapshot = await admin.firestore().collection('posts').get();
-      return snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
-    } catch (error) {
-      throw new Error(`Failed to fetch posts: ${error.message}`);
+  async getPosts({
+    cursor,
+    limit,
+    search,
+    sortBy = 'commentsCount',
+    sortDirection = 'desc',
+  }: {
+    cursor?: string;
+    limit: number;
+    search?: string;
+    sortBy?: 'commentsCount' | 'likesCount';
+    sortDirection?: 'asc' | 'desc';
+  }) {
+    const postsCollection = admin.firestore().collection('posts');
+
+    let query: FirebaseFirestore.Query = postsCollection;
+
+    if (search) {
+      query = query
+        .where('content', '>=', search)
+        .where('content', '<=', search + '\uf8ff');
     }
+
+    query = query.orderBy(sortBy, sortDirection);
+
+    if (cursor) {
+      const lastDocSnapshot = await postsCollection.doc(cursor).get();
+      if (lastDocSnapshot.exists) {
+        query = query.startAfter(lastDocSnapshot);
+      }
+    }
+
+    query = query.limit(limit);
+
+    const snapshot = await query.get();
+
+    const posts = snapshot.docs.map((doc) => ({
+      id: doc.id,
+      ...doc.data(),
+    }));
+
+    return posts;
   }
 }

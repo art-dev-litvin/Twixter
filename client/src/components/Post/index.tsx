@@ -10,7 +10,7 @@ import { PostType } from "../../types/post";
 
 interface PostProps {
   post: PostType;
-  maxWidth?: number;
+  maxWidth?: number | string;
 }
 
 function Post({
@@ -22,7 +22,7 @@ function Post({
     imageUrl,
     //userId,
     userDisplayName,
-    userPhotoURL,
+    userPhotoUrl,
     comments,
     rating,
   },
@@ -35,7 +35,7 @@ function Post({
         style={{ maxWidth }}>
         <header className="flex justify-between gap-4 items-center">
           <div className="flex gap-2 items-center">
-            <Avatar src={userPhotoURL} size={40} />
+            <Avatar src={userPhotoUrl} size={40} />
             <span className="font-bold">{userDisplayName}</span>
           </div>
           <div>
@@ -47,7 +47,7 @@ function Post({
         <section className="mt-4">
           <h3 className="font-bold text-lg">{title}</h3>
           {imageUrl && (
-            <div className="h-48 w-full">
+            <div className="h-96 w-full my-4">
               <img
                 className="object-cover rounded-lg size-full"
                 src={imageUrl}
@@ -55,7 +55,7 @@ function Post({
               />
             </div>
           )}
-          <p className="mt-2 text-sm">{content}</p>
+          <p className="mt-2 text-base">{content}</p>
         </section>
         <div className="mt-4 flex justify-between">
           <div className="flex gap-4">
