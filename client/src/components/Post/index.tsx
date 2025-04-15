@@ -1,5 +1,3 @@
-import { User } from "firebase/auth";
-import React from "react";
 import Avatar from "../Avatar";
 import {
   EllipsisVerticalIcon,
@@ -8,41 +6,26 @@ import {
   ThumbsUpIcon,
 } from "lucide-react";
 import Button from "../Button";
-
-type Comment = { user: User; text: string };
-type Rating = {
-  likes: number;
-  dislikes: number;
-};
+import { PostType } from "../../types/post";
 
 interface PostProps {
-  id: string;
-  title: string;
-  content: string;
-  imageURL: string;
-  createdAt: Date | string;
-
-  rating: Rating;
-  comments: Comment[];
-
-  userId: string;
-  userDisplayName?: string;
-  userPhotoURL?: string;
-
+  post: PostType;
   maxWidth?: number;
 }
 
 function Post({
-  id,
-  title,
-  content,
-  createdAt,
-  imageURL,
-  userId,
-  userDisplayName,
-  userPhotoURL,
-  comments,
-  rating,
+  post: {
+    //id,
+    title,
+    content,
+    createdAt,
+    imageUrl,
+    //userId,
+    userDisplayName,
+    userPhotoURL,
+    comments,
+    rating,
+  },
   maxWidth = 360,
 }: PostProps) {
   return (
@@ -63,13 +46,15 @@ function Post({
         </header>
         <section className="mt-4">
           <h3 className="font-bold text-lg">{title}</h3>
-          <div className="h-48 w-full">
-            <img
-              className="object-cover rounded-lg size-full"
-              src={imageURL}
-              alt={title}
-            />
-          </div>
+          {imageUrl && (
+            <div className="h-48 w-full">
+              <img
+                className="object-cover rounded-lg size-full"
+                src={imageUrl}
+                alt={title}
+              />
+            </div>
+          )}
           <p className="mt-2 text-sm">{content}</p>
         </section>
         <div className="mt-4 flex justify-between">

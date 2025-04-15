@@ -1,7 +1,8 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { FirebaseService } from 'src/firebase/firebase.service';
-import * as admin from 'firebase-admin';
 import { FirebaseAuthError, UserRecord } from 'firebase-admin/auth';
+import { uploadBase64ToFirebaseStorage } from 'src/utils/uploadBase64ToFirebaseStorage';
+import { parseBase64Image } from 'src/utils/parseBase64Image';
 
 @Injectable()
 export class AuthService {
@@ -50,28 +51,15 @@ export class AuthService {
 
     try {
       if (profileImageBase64) {
-        const matches = profileImageBase64.match(/^data:(.+);base64,(.+)$/);
+        const imagePath = `users/${uid}/profile-${Date.now()}`;
 
-        if (!matches || matches.length !== 3) {
-          throw new Error('Invalid image data');
-        }
+        const { mimeType, base64Data } = parseBase64Image(profileImageBase64);
 
-        const mimeType = matches[1];
-        const base64Data = matches[2];
-        const buffer = Buffer.from(base64Data, 'base64');
-
-        const filename = `users/${uid}/profile-${Date.now()}.jpg`;
-        const bucket = admin.storage().bucket();
-        const fileUpload = bucket.file(filename);
-
-        await fileUpload.save(buffer, {
-          metadata: {
-            contentType: mimeType,
-          },
-        });
-
-        await fileUpload.makePublic();
-        photoURL = `https://storage.googleapis.com/${bucket.name}/${filename}`;
+        photoURL = await uploadBase64ToFirebaseStorage(
+          base64Data,
+          imagePath,
+          mimeType,
+        );
       }
 
       const userRecord = await auth.updateUser(uid, {

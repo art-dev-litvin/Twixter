@@ -4,10 +4,16 @@ import Popup from "../Popup";
 import { useFormik } from "formik";
 import { newPostSchema } from "./schema";
 import FormField from "../FormField";
-import axios from "axios";
-import { apiPaths } from "../../constants/api-paths";
+import { fileToBase64 } from "../../utils/fileToBase64";
+import { createPost } from "../../services/api-requests/createPost";
+import { toast } from "react-toastify";
+import { PostType } from "../../types/post";
 
-function NewPost() {
+interface NewPostProps {
+  setPosts: React.Dispatch<React.SetStateAction<PostType[]>>;
+}
+
+function NewPost({ setPosts }: NewPostProps) {
   const [openPopup, setOpenPopup] = React.useState(false);
   const [isLoading, setIsLoading] = React.useState(false);
 
@@ -15,26 +21,40 @@ function NewPost() {
     initialValues: {
       title: "",
       content: "",
-      imageURL: "",
+      imageBase64: "",
     },
     validationSchema: newPostSchema,
     onSubmit: async (values) => {
       setIsLoading(true);
-      try {
-        await axios.post(apiPaths.posts.new, values);
-        console.log("Post created successfully");
-      } catch (error) {
-        console.error("Error creating post:", error);
-      } finally {
-        setIsLoading(false);
+
+      const data = await createPost(values);
+
+      if ("error" in data) {
+        toast.error(data.error);
+      } else {
+        setPosts((prev) => [...prev, data]);
+        toast.success("Post created!");
+
+        formik.resetForm();
+        setOpenPopup(false);
       }
-      console.log("Form Submitted:", values);
-      setOpenPopup(false); // Close the popup after submission
+
+      setIsLoading(false);
     },
   });
 
   const handlePopup = (open: boolean) => () => {
     setOpenPopup(open);
+  };
+
+  const onChangeImage = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.currentTarget.files?.[0];
+
+    if (file) {
+      const imageBase64 = await fileToBase64(file);
+
+      formik.setFieldValue("imageBase64", imageBase64);
+    }
   };
 
   return (
@@ -77,19 +97,17 @@ function NewPost() {
           </FormField>
 
           <FormField>
-            <FormField.Label htmlFor="imageURL">Image</FormField.Label>
+            <FormField.Label htmlFor="imageBase64">Image</FormField.Label>
             <FormField.Input
               type="file"
-              id="imageURL"
-              name="imageURL"
-              value={formik.values.imageURL}
-              onChange={formik.handleChange}
-              onBlur={formik.handleBlur}
+              id="imageBase64"
+              name="imageBase64"
+              onChange={onChangeImage}
               accept="image/*"
             />
-            {/* {formik.touched.imageURL && formik.errors.imageURL && (
-              <FormField.Error>{formik.errors.imageURL}</FormField.Error>
-            )} */}
+            {formik.touched.imageBase64 && formik.errors.imageBase64 && (
+              <FormField.Error>{formik.errors.imageBase64}</FormField.Error>
+            )}
           </FormField>
           <div className="mt-4">
             <Button fullWidth type="submit" disabled={isLoading}>
