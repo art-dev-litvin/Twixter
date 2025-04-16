@@ -26,13 +26,13 @@ function Post({
     comments,
     rating,
   },
-  maxWidth = 360,
+  maxWidth,
 }: PostProps) {
   return (
     <>
       <div
-        className="shadow-md bg-slate-50 p-4 rounded-xl"
-        style={{ maxWidth }}>
+        className="shadow-md bg-slate-50 p-4 rounded-xl mb-4 break-inside-avoid"
+        style={{ maxWidth: maxWidth || "100%" }}>
         <header className="flex justify-between gap-4 items-center">
           <div className="flex gap-2 items-center">
             <Avatar src={userPhotoUrl} size={40} />

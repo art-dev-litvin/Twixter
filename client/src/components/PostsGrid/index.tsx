@@ -9,9 +9,9 @@ function PostsGrid({ posts }: PostsGridProps) {
   console.log(posts);
 
   return (
-    <div className="grid grid-cols-2 gap-6">
+    <div className="columns-1 sm:columns-2 md:columns-3 gap-4">
       {posts.map((post) => (
-        <Post key={post.id} post={post} maxWidth={"100%"} />
+        <Post key={post.id} post={post} />
       ))}
     </div>
   );
