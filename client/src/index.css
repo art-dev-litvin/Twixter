@@ -3,7 +3,9 @@
 
 @theme {
   --default-font-family: "Poppins";
-
-  /*--shadow-md: 0 0px 8px -1px var(--tw-shadow-color, rgb(0 0 0 / 0.1)),
-    0 0 6px -2px var(--tw-shadow-color, rgb(0 0 0 / 0.1));*/
+}
+@layer utilities {
+  .container {
+    @apply min-sm:max-w-[640px] min-md:max-w-[768px] min-lg:max-w-[1024px] min-xl:max-w-[1224px] min-2xl:max-w-[1224px];
+  }
 }

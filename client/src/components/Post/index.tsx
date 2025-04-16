@@ -47,7 +47,7 @@ function Post({
         <section className="mt-4">
           <h3 className="font-bold text-lg">{title}</h3>
           {imageUrl && (
-            <div className="h-96 w-full my-4">
+            <div className="h-80 w-full my-4">
               <img
                 className="object-cover rounded-lg size-full"
                 src={imageUrl}

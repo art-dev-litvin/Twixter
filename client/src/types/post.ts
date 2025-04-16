@@ -5,7 +5,7 @@ export interface PostType {
   title: string;
   content: string;
   imageUrl?: string;
-  createdAt: string;
+  createdAt: Date;
   userId: string;
   userDisplayName: string;
   userPhotoUrl?: string;

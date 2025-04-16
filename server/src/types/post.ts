@@ -1,4 +1,5 @@
 import { UserRecord } from 'firebase-admin/auth';
+import { Timestamp } from 'firebase-admin/firestore';
 
 export interface PostType {
   id: string;

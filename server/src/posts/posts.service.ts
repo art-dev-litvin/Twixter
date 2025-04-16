@@ -3,6 +3,7 @@ import { HttpException, Injectable } from '@nestjs/common';
 import { parseBase64Image } from 'src/utils/parseBase64Image';
 import { uploadBase64ToFirebaseStorage } from 'src/utils/uploadBase64ToFirebaseStorage';
 import { PostType } from 'src/types/post';
+import { Timestamp } from 'firebase-admin/firestore';
 
 @Injectable()
 export class PostsService {
@@ -99,10 +100,12 @@ export class PostsService {
 
     const snapshot = await query.get();
 
-    const posts = snapshot.docs.map((doc) => ({
-      id: doc.id,
-      ...doc.data(),
-    }));
+    const posts = snapshot.docs.map((doc) => {
+      const data = doc.data();
+      const createdAt = data.createdAt.toDate(); // make date from timestamp instance
+
+      return { ...data, createdAt };
+    });
 
     return posts;
   }
