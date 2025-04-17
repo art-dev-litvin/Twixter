@@ -1,7 +1,15 @@
-import { Controller, Get, ParseIntPipe, Query } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Param,
+  ParseIntPipe,
+  Patch,
+  Query,
+} from '@nestjs/common';
 import { Body, Post } from '@nestjs/common';
 import { PostsService } from './posts.service';
 import { CreatePostDto } from './dtos/create-post.dto';
+import { UpdatePostDto } from './dtos/update-post.dto';
 
 @Controller('posts')
 export class PostsController {
@@ -14,11 +22,24 @@ export class PostsController {
 
   @Get()
   async getPosts(
-    @Query('cursor') cursor?: string,
+    @Query('cursor') cursor: string | null,
     @Query('limit', ParseIntPipe) limit = 10,
     @Query('sortBy') sortBy: 'likesCount' | 'commentsCount' = 'likesCount',
     @Query('search') search?: string,
   ) {
     return this.postsService.getPosts({ cursor, limit, sortBy, search });
+  }
+
+  @Get(':id')
+  async getPost(@Param('id') id: string) {
+    return this.postsService.getPost(id);
+  }
+
+  @Patch(':id')
+  async updatePost(
+    @Param('id') id: string,
+    @Body() updateData: Partial<UpdatePostDto>,
+  ) {
+    return this.postsService.updatePost(id, updateData);
   }
 }

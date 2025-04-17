@@ -4,6 +4,7 @@ import { parseBase64Image } from 'src/utils/parseBase64Image';
 import { uploadBase64ToFirebaseStorage } from 'src/utils/uploadBase64ToFirebaseStorage';
 import { PostType } from 'src/types/post';
 import { Timestamp } from 'firebase-admin/firestore';
+import { UpdatePostDto } from './dtos/update-post.dto';
 
 @Injectable()
 export class PostsService {
@@ -106,5 +107,65 @@ export class PostsService {
     });
 
     return { posts };
+  }
+
+  async getPost(postId: string) {
+    try {
+      const postDoc = await admin
+        .firestore()
+        .collection('posts')
+        .doc(postId)
+        .get();
+
+      if (!postDoc.exists) {
+        throw new HttpException('Post not found', 404);
+      }
+
+      const postData = postDoc.data();
+
+      return { post: postData };
+    } catch (error) {
+      throw new HttpException(`Failed to get post: ${error.message}`, 400);
+    }
+  }
+
+  async updatePost(postId: string, updateData: Partial<UpdatePostDto>) {
+    try {
+      const { title, content, imageBase64, oldImageUrl } = updateData;
+      const postRef = admin.firestore().collection('posts').doc(postId);
+      const postDoc = await postRef.get();
+      let imageUrl: string | undefined;
+      if (!postDoc.exists) {
+        throw new HttpException('Post not found', 404);
+      }
+
+      if (imageBase64) {
+        const imagePath = oldImageUrl
+          ? oldImageUrl
+          : `posts/${postId}/image/${Date.now()}`;
+        console.log('path', imagePath);
+        console.log(oldImageUrl);
+        const { mimeType, base64Data } = parseBase64Image(imageBase64);
+
+        imageUrl = await uploadBase64ToFirebaseStorage(
+          base64Data,
+          imagePath,
+          mimeType,
+        );
+      }
+
+      const updatedAt = new Date();
+      await postRef.update({
+        title,
+        content,
+        imageUrl: imageUrl || oldImageUrl,
+        updatedAt,
+      });
+
+      const updatedPost = await postRef.get();
+      return { post: updatedPost.data() };
+    } catch (error) {
+      throw new HttpException(`Failed to update post: ${error.message}`, 400);
+    }
   }
 }

@@ -9,14 +9,19 @@ import EmailVerification from "./pages/EmailVerification";
 import Profile from "./pages/Profile";
 import EditProfile from "./pages/EditProfile";
 import ForgotPassword from "./pages/ForgotPassword";
+import EditPost from "./pages/EditPost";
 
 function App() {
+  console.log(routes.editPost(":id"));
+
   return (
     <div>
       <Header />
       <div className="mt-12 container px-3 pb-4 m-auto">
         <Routes>
           <Route path={routes.home} element={<Home />} />
+
+          <Route path={routes.editPost(":id")} element={<EditPost />} />
 
           <Route path={routes.profile} element={<Profile />} />
           <Route path={routes.editProfile} element={<EditProfile />} />

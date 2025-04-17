@@ -7,6 +7,8 @@ export const apiPaths = {
   },
   posts: {
     new: BASE_URL + "/posts/new", // POST
-    getAll: BASE_URL + "/posts",
+    getAll: BASE_URL + "/posts", // GET
+    updateOne: (postId: string) => BASE_URL + `/posts/${postId}`, // PATCH
+    getOne: (postId: string) => BASE_URL + `/posts/${postId}`, // GET
   },
 };

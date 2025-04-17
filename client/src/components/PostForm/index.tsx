@@ -8,15 +8,24 @@ import Button from "../Button";
 interface PostFormProps {
   operation: "update" | "create";
   handleSubmit: (values: PostFormFields) => Promise<void>;
+  defaultFieldValues?: {
+    title: string;
+    content: string;
+    imageUrl: string | undefined;
+  };
 }
 
-function PostForm({ handleSubmit, operation }: PostFormProps) {
+function PostForm({
+  handleSubmit,
+  operation,
+  defaultFieldValues,
+}: PostFormProps) {
   const imageFileInputRef = React.useRef<HTMLInputElement>(null);
 
   const formik = useFormik<PostFormFields>({
     initialValues: {
-      title: "",
-      content: "",
+      title: defaultFieldValues?.title || "",
+      content: defaultFieldValues?.content || "",
       imageBase64: "",
     },
     validationSchema: postFormSchema,
@@ -27,11 +36,11 @@ function PostForm({ handleSubmit, operation }: PostFormProps) {
 
       if (operation === "create") {
         formik.resetForm();
+      }
 
-        const imageFileInput = imageFileInputRef.current;
-        if (imageFileInput) {
-          imageFileInput.value = "";
-        }
+      const imageFileInput = imageFileInputRef.current;
+      if (imageFileInput) {
+        imageFileInput.value = "";
       }
 
       formik.setSubmitting(false);
@@ -82,6 +91,13 @@ function PostForm({ handleSubmit, operation }: PostFormProps) {
 
       <FormField>
         <FormField.Label htmlFor="imageBase64">Image</FormField.Label>
+        {operation === "update" && defaultFieldValues?.imageUrl && (
+          <img
+            className="h-40 w-full object-cover rounded-xl my-2 border-2 border-slate-500"
+            src={defaultFieldValues?.imageUrl}
+            alt={defaultFieldValues?.title}
+          />
+        )}
         <FormField.Input
           ref={imageFileInputRef}
           type="file"

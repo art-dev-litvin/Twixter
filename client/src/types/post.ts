@@ -31,4 +31,11 @@ export interface CreatePostDto {
   userPhotoUrl?: string;
 }
 
+export interface UpdatePostDto {
+  title: string;
+  content: string;
+  imageBase64?: string;
+  oldImageUrl?: string;
+}
+
 export type PostsSortByType = "likesCount" | "commentsCount";
