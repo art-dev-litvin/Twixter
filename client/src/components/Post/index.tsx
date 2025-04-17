@@ -7,6 +7,10 @@ import {
 } from "lucide-react";
 import Button from "../Button";
 import { PostType } from "../../types/post";
+import Dropdown from "../Dropdown";
+import { useNavigate } from "react-router-dom";
+import { auth } from "../../services/firebase";
+import { routes } from "../../constants/routes";
 
 interface PostProps {
   post: PostType;
@@ -15,12 +19,12 @@ interface PostProps {
 
 function Post({
   post: {
-    //id,
+    id,
     title,
     content,
     createdAt,
     imageUrl,
-    //userId,
+    userId,
     userDisplayName,
     userPhotoUrl,
     comments,
@@ -28,6 +32,13 @@ function Post({
   },
   maxWidth,
 }: PostProps) {
+  const navigate = useNavigate();
+  const currentUser = auth.currentUser;
+
+  const onClickEditPost = () => {
+    navigate(routes.editPost(id));
+  };
+
   return (
     <>
       <div
@@ -38,11 +49,19 @@ function Post({
             <Avatar src={userPhotoUrl} size={40} />
             <span className="font-bold">{userDisplayName}</span>
           </div>
-          <div>
-            <Button className="!size-8" isIconOnly variant="transparent">
-              <EllipsisVerticalIcon className="shrink-0" />
-            </Button>
-          </div>
+
+          {currentUser && currentUser.uid === userId && (
+            <Dropdown>
+              <Dropdown.Trigger>
+                <Button className="!size-8" isIconOnly variant="transparent">
+                  <EllipsisVerticalIcon className="shrink-0" />
+                </Button>
+              </Dropdown.Trigger>
+              <Dropdown.Menu>
+                <Dropdown.Item onClick={onClickEditPost}>Edit</Dropdown.Item>
+              </Dropdown.Menu>
+            </Dropdown>
+          )}
         </header>
         <section className="mt-4">
           <h3 className="font-bold text-lg">{title}</h3>

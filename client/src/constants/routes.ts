@@ -6,4 +6,5 @@ export const routes = {
   profile: "/profile",
   editProfile: "/profile/edit",
   forgotPassword: "/forgot-password",
+  editPost: (postId: string) => `/posts/${postId}/edit`,
 };
