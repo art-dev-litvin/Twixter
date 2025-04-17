@@ -69,13 +69,11 @@ export class PostsService {
     limit,
     search,
     sortBy = 'commentsCount',
-    sortDirection = 'desc',
   }: {
-    cursor?: string;
+    cursor: string | null;
     limit: number;
     search?: string;
     sortBy?: 'commentsCount' | 'likesCount';
-    sortDirection?: 'asc' | 'desc';
   }) {
     const postsCollection = admin.firestore().collection('posts');
 
@@ -87,7 +85,7 @@ export class PostsService {
         .where('content', '<=', search + '\uf8ff');
     }
 
-    query = query.orderBy(sortBy, sortDirection);
+    query = query.orderBy(sortBy, 'desc');
 
     if (cursor) {
       const lastDocSnapshot = await postsCollection.doc(cursor).get();
@@ -102,11 +100,11 @@ export class PostsService {
 
     const posts = snapshot.docs.map((doc) => {
       const data = doc.data();
-      const createdAt = data.createdAt.toDate(); // make date from timestamp instance
+      const createdAt = data.createdAt.toDate();
 
       return { ...data, createdAt };
     });
 
-    return posts;
+    return { posts };
   }
 }

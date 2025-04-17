@@ -6,8 +6,6 @@ interface PostsGridProps {
 }
 
 function PostsGrid({ posts }: PostsGridProps) {
-  console.log(posts);
-
   return (
     <div className="columns-1 sm:columns-2 md:columns-3 gap-4">
       {posts.map((post) => (

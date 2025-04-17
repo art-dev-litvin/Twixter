@@ -30,3 +30,5 @@ export interface CreatePostDto {
   userId: string;
   userPhotoUrl?: string;
 }
+
+export type PostsSortByType = "likesCount" | "commentsCount";

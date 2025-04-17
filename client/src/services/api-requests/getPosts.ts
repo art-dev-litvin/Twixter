@@ -1,17 +1,32 @@
 import axios from "axios";
 import { apiPaths } from "../../constants/api-paths";
 import { getErrorMessage } from "../../utils/getErrorMessage";
-import { PostType } from "../../types/post";
+import { PostType, PostsSortByType } from "../../types/post";
 
-export const getPosts = async (): Promise<PostType[] | { error: string }> => {
+export const getPosts = async ({
+  sortBy,
+  limit,
+  cursor,
+}: {
+  sortBy: PostsSortByType | null;
+  limit: number;
+  cursor: string | null;
+}): Promise<
+  | { posts: PostType[]; totalCount: number; nextCursor: string }
+  | { error: string }
+> => {
   try {
-    const { data: posts } = await axios.get(apiPaths.posts.getAll, {
+    const { data } = await axios.get(apiPaths.posts.getAll, {
       params: {
-        limit: 10,
+        limit,
+        sortBy,
+        cursor,
       },
     });
 
-    return posts;
+    const { posts, totalCount, nextCursor } = data;
+
+    return { posts, totalCount, nextCursor };
   } catch (error) {
     return getErrorMessage(error);
   }

@@ -3,6 +3,7 @@ import { FirebaseService } from 'src/firebase/firebase.service';
 import { FirebaseAuthError, UserRecord } from 'firebase-admin/auth';
 import { uploadBase64ToFirebaseStorage } from 'src/utils/uploadBase64ToFirebaseStorage';
 import { parseBase64Image } from 'src/utils/parseBase64Image';
+import * as admin from 'firebase-admin';
 
 @Injectable()
 export class AuthService {
@@ -67,6 +68,24 @@ export class AuthService {
         password: newPassword,
         photoURL,
       });
+
+      if (username || photoURL) {
+        const firestore = admin.firestore();
+        const postsRef = firestore.collection('posts');
+        const userPostsQuery = postsRef.where('userId', '==', uid);
+
+        const userPostsSnapshot = await userPostsQuery.get();
+        const batch = firestore.batch();
+
+        userPostsSnapshot.forEach((doc) => {
+          batch.update(doc.ref, {
+            userDisplayName: username || userRecord.displayName,
+            userPhotoUrl: photoURL || userRecord.photoURL,
+          });
+        });
+
+        await batch.commit();
+      }
 
       return {
         result: 'Profile updated successfully',
