@@ -69,9 +69,9 @@ function Menu({ children }: { children: ReactNode }) {
       <>
         <div
           onClick={handleOpen(false)}
-          className="size-full fixed top-0 left-0 z-40"
+          className="size-full fixed top-0 left-0 z-30"
         />
-        <div className="absolute z-50 right-0 mt-2 w-56 origin-top-right rounded-md bg-white shadow-lg ring-2 ring-slate-300 focus:outline-none">
+        <div className="absolute z-40 right-0 mt-2 w-56 origin-top-right rounded-md bg-white shadow-lg ring-2 ring-slate-300 focus:outline-none">
           <div className="py-1">{children}</div>
         </div>
       </>

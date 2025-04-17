@@ -14,8 +14,8 @@ function Popup({ onClose, open, children }: PopupProps) {
         "opacity-100 pointer-events-auto": open,
         "opacity-0 pointer-events-none": !open,
       })}>
-      <div onClick={onClose} className={"fixed inset-0 bg-black/50"} />
-      <div className="fixed z-50 top-1/2 left-1/2 -translate-1/2 bg-white rounded-lg shadow-lg p-6">
+      <div onClick={onClose} className={"fixed inset-0 bg-black/50 z-30"} />
+      <div className="fixed z-40 top-1/2 left-1/2 -translate-1/2 bg-white rounded-lg shadow-lg p-6">
         {children}
       </div>
     </div>

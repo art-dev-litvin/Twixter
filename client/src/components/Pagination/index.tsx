@@ -17,7 +17,7 @@ const Pagination: React.FC<PaginationProps> = ({
   isNextDisabled,
 }) => {
   return (
-    <div>
+    <div className="mt-8">
       <span className="font-bold inline-block mb-2">
         Page {currentPageIndex + 1}
       </span>

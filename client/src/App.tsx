@@ -14,7 +14,7 @@ function App() {
   return (
     <div>
       <Header />
-      <div className="mt-28 container px-3 pb-4 m-auto">
+      <div className="mt-12 container px-3 pb-4 m-auto">
         <Routes>
           <Route path={routes.home} element={<Home />} />
 
