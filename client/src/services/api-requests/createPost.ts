@@ -1,12 +1,12 @@
 import axios, { AxiosResponse } from "axios";
 import { apiPaths } from "../../constants/api-paths";
-import { NewPostSchema } from "../../components/NewPost/schema";
+import { PostFormFields } from "../../components/PostForm/schema";
 import { getErrorMessage } from "../../utils/getErrorMessage";
 import { CreatePostDto, PostType } from "../../types/post";
 import { auth } from "../firebase";
 
 const createPost = async (
-  values: NewPostSchema
+  values: PostFormFields
 ): Promise<PostType | { error: string }> => {
   const user = auth?.currentUser;
   if (user) {
