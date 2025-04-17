@@ -10,5 +10,6 @@ export const apiPaths = {
     getAll: BASE_URL + "/posts", // GET
     updateOne: (postId: string) => BASE_URL + `/posts/${postId}`, // PATCH
     getOne: (postId: string) => BASE_URL + `/posts/${postId}`, // GET
+    getAllByUser: (userId: string) => BASE_URL + `/posts/user/${userId}`, // GET
   },
 };

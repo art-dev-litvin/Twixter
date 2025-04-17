@@ -42,4 +42,9 @@ export class PostsController {
   ) {
     return this.postsService.updatePost(id, updateData);
   }
+
+  @Get('/user/:id')
+  async getPostsByUser(@Param('id') userId: string) {
+    return this.postsService.getPostsByUser(userId);
+  }
 }

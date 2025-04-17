@@ -109,6 +109,30 @@ export class PostsService {
     return { posts };
   }
 
+  async getPostsByUser(userId: string) {
+    try {
+      const postsCollection = admin.firestore().collection('posts');
+      const query = postsCollection
+        .where('userId', '==', userId)
+        .orderBy('createdAt', 'desc');
+      const snapshot = await query.get();
+
+      const posts = snapshot.docs.map((doc) => {
+        const data = doc.data();
+        const createdAt = data.createdAt.toDate();
+
+        return { ...data, createdAt };
+      });
+
+      return { posts };
+    } catch (error) {
+      throw new HttpException(
+        `Failed to get posts by user: ${error.message}`,
+        400,
+      );
+    }
+  }
+
   async getPost(postId: string) {
     try {
       const postDoc = await admin

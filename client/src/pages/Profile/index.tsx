@@ -4,9 +4,31 @@ import RemoveAccount from "../../components/RemoveAccount";
 import { useAuth } from "../../contexts/auth/Auth.hook";
 import Button from "../../components/Button";
 import { routes } from "../../constants/routes";
+import { PostType } from "../../types/post";
+import React from "react";
+import { getUserPosts } from "../../services/api-requests/getUserPosts";
+import { toast } from "react-toastify";
+import PostsGrid from "../../components/PostsGrid";
 
 function Profile() {
   const { user } = useAuth();
+  const [userPosts, setUserPosts] = React.useState<PostType[]>([]);
+
+  React.useEffect(() => {
+    if (user) {
+      const fetchUserPosts = async () => {
+        const data = await getUserPosts(user.uid);
+
+        if ("error" in data) {
+          toast.error(data.error);
+        } else {
+          setUserPosts(data.posts);
+        }
+      };
+
+      fetchUserPosts();
+    }
+  }, [user]);
 
   if (!user) {
     return (
@@ -44,6 +66,9 @@ function Profile() {
           Edit profile
         </Button>
         <RemoveAccount />
+      </div>
+      <div className="mt-12 pt-12 border-t border-slate-200">
+        <PostsGrid posts={userPosts} />
       </div>
     </div>
   );

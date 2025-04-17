@@ -7,4 +7,5 @@ export const routes = {
   editProfile: "/profile/edit",
   forgotPassword: "/forgot-password",
   editPost: (postId: string) => `/posts/${postId}/edit`,
+  userById: (userId: string) => `/users/${userId}`,
 };
