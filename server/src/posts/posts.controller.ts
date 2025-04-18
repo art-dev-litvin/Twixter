@@ -10,6 +10,7 @@ import { Body, Post } from '@nestjs/common';
 import { PostsService } from './posts.service';
 import { CreatePostDto } from './dtos/create-post.dto';
 import { UpdatePostDto } from './dtos/update-post.dto';
+import { Delete } from '@nestjs/common';
 
 @Controller('posts')
 export class PostsController {
@@ -46,5 +47,10 @@ export class PostsController {
   @Get('/user/:id')
   async getPostsByUser(@Param('id') userId: string) {
     return this.postsService.getPostsByUser(userId);
+  }
+
+  @Delete(':id')
+  async deletePost(@Param('id') id: string) {
+    return this.postsService.deletePost(id);
   }
 }

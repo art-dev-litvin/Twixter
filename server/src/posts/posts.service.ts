@@ -3,7 +3,6 @@ import { HttpException, Injectable } from '@nestjs/common';
 import { parseBase64Image } from 'src/utils/parseBase64Image';
 import { uploadBase64ToFirebaseStorage } from 'src/utils/uploadBase64ToFirebaseStorage';
 import { PostType } from 'src/types/post';
-import { Timestamp } from 'firebase-admin/firestore';
 import { UpdatePostDto } from './dtos/update-post.dto';
 
 @Injectable()
@@ -182,7 +181,7 @@ export class PostsService {
       await postRef.update({
         title,
         content,
-        imageUrl: imageUrl || oldImageUrl,
+        ...((imageUrl || oldImageUrl) && { imageUrl: imageUrl || oldImageUrl }),
         updatedAt,
       });
 
@@ -190,6 +189,21 @@ export class PostsService {
       return { post: updatedPost.data() };
     } catch (error) {
       throw new HttpException(`Failed to update post: ${error.message}`, 400);
+    }
+  }
+
+  async deletePost(postId: string) {
+    try {
+      const postRef = admin.firestore().collection('posts').doc(postId);
+      const postDoc = await postRef.get();
+
+      if (!postDoc.exists) {
+        throw new HttpException('Post not found', 404);
+      }
+
+      await postRef.delete();
+    } catch (error) {
+      throw new HttpException(`Failed to delete post: ${error.message}`, 400);
     }
   }
 }

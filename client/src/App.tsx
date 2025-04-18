@@ -10,10 +10,9 @@ import Profile from "./pages/Profile";
 import EditProfile from "./pages/EditProfile";
 import ForgotPassword from "./pages/ForgotPassword";
 import EditPost from "./pages/EditPost";
+import UserProfile from "./pages/UserProfile";
 
 function App() {
-  console.log(routes.editPost(":id"));
-
   return (
     <div>
       <Header />
@@ -23,6 +22,7 @@ function App() {
 
           <Route path={routes.editPost(":id")} element={<EditPost />} />
 
+          <Route path={routes.userById(":id")} element={<UserProfile />} />
           <Route path={routes.profile} element={<Profile />} />
           <Route path={routes.editProfile} element={<EditProfile />} />
 

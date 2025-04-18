@@ -8,6 +8,7 @@ import PostsSortBy from "../../components/PostsSortBySelect";
 import Pagination from "../../components/Pagination";
 import { postsLimitPerPage } from "../../constants/postsLimitPerPage";
 import { useSearchParams } from "react-router-dom";
+import { usePostsUpdates } from "../../contexts/postsUpdates/postsUpdates.hook";
 
 function Home() {
   const [posts, setPosts] = React.useState<PostType[]>([]);
@@ -18,13 +19,10 @@ function Home() {
     (string | null)[]
   >([null]);
   const [isEndReached, setIsEndReached] = React.useState(false);
+  const { shouldUpdatePosts, setShouldUpdatePosts } = usePostsUpdates();
 
-  React.useEffect(() => {
-    setIsLoading(true);
-
-    const sortBy = searchParams.get("sortBy") as PostsSortByType | null;
-
-    async function fetchPosts() {
+  const fetchPosts = React.useCallback(
+    async (sortBy: PostsSortByType | null) => {
       const cursor = pageCursorsHistory[currentPageIndex];
 
       const data = await getPosts({
@@ -40,7 +38,7 @@ function Home() {
         window.scrollTo({ top: 0 });
         setIsEndReached(data.posts.length < postsLimitPerPage);
 
-        const nextCursor = data.posts[data.posts.length - 1].id;
+        const nextCursor = data.posts[data.posts.length - 1]?.id;
 
         if (nextCursor && !pageCursorsHistory.includes(nextCursor)) {
           setPageCursorsHistory((prev) => {
@@ -52,10 +50,24 @@ function Home() {
       }
 
       setIsLoading(false);
-    }
+    },
+    []
+  );
 
-    fetchPosts();
-  }, [searchParams, currentPageIndex, pageCursorsHistory]);
+  React.useEffect(() => {
+    setIsLoading(true);
+
+    const sortBy = searchParams.get("sortBy") as PostsSortByType | null;
+
+    fetchPosts(sortBy);
+  }, [searchParams]);
+
+  React.useEffect(() => {
+    if (shouldUpdatePosts) {
+      fetchPosts(null);
+      setShouldUpdatePosts(false);
+    }
+  }, [shouldUpdatePosts]);
 
   const goToPrevPage = () => {
     if (currentPageIndex > 0) {

@@ -24,7 +24,6 @@ export class AuthService {
         customToken,
       };
     } catch (error) {
-      console.log('this is error', error);
       if (error.code === 'auth/email-already-exists') {
         throw new HttpException('Email already exists', HttpStatus.CONFLICT);
       } else if (error.code === 'auth/invalid-email') {
@@ -97,6 +96,23 @@ export class AuthService {
       } else if (error instanceof Error) {
         throw new HttpException(error.message, 400);
       }
+    }
+  }
+
+  async getUserById(uid: string): Promise<UserRecord> {
+    const auth = this.firebaseService.getAuth();
+
+    try {
+      const userRecord = await auth.getUser(uid);
+      return userRecord;
+    } catch (error) {
+      if (error.code === 'auth/user-not-found') {
+        throw new HttpException('User not found', HttpStatus.NOT_FOUND);
+      }
+      throw new HttpException(
+        'Unexpected error occurred while fetching user',
+        HttpStatus.BAD_REQUEST,
+      );
     }
   }
 }

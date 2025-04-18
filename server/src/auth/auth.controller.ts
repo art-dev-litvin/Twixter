@@ -1,4 +1,4 @@
-import { Body, Controller, Post } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { CreateUserDto } from './dtos/createUser.dto';
 import { UpdateProfileDto } from './dtos/updateProfile.dto';
@@ -24,5 +24,10 @@ export class AuthController {
       newPassword,
       profileImageBase64,
     );
+  }
+
+  @Get('/user/:id')
+  async getUserById(@Param('id') id: string) {
+    return this.authService.getUserById(id);
   }
 }

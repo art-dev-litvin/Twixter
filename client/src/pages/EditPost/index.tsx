@@ -34,7 +34,10 @@ function EditPost() {
   }, [params]);
   const handleSubmit = async (values: PostFormFields) => {
     console.log("old image", post?.imageUrl);
-
+    console.log({
+      ...values,
+      oldImageUrl: post?.imageUrl,
+    });
     const data = await updatePost(post!.id, {
       ...values,
       oldImageUrl: post?.imageUrl,

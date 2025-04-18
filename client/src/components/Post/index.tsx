@@ -11,14 +11,17 @@ import Dropdown from "../Dropdown";
 import { useNavigate } from "react-router-dom";
 import { auth } from "../../services/firebase";
 import { routes } from "../../constants/routes";
+import RemovePost from "../RemovePost";
+import React from "react";
+import { usePostsUpdates } from "../../contexts/postsUpdates/postsUpdates.hook";
 
 interface PostProps {
   post: PostType;
   maxWidth?: number | string;
 }
 
-function Post({
-  post: {
+function Post({ post, maxWidth }: PostProps) {
+  const {
     id,
     title,
     content,
@@ -29,14 +32,26 @@ function Post({
     userPhotoUrl,
     comments,
     rating,
-  },
-  maxWidth,
-}: PostProps) {
+  } = post;
+
+  const [isDropdownOpen, setIsDropdownOpen] = React.useState(false);
+  const { setShouldUpdatePosts } = usePostsUpdates();
+
   const navigate = useNavigate();
   const currentUser = auth.currentUser;
 
+  const changeDropdownOpen = (newOpen: boolean) => {
+    setIsDropdownOpen(newOpen);
+  };
+
   const onClickEditPost = () => {
     navigate(routes.editPost(id));
+  };
+
+  const onRemovePost = async () => {
+    changeDropdownOpen(false);
+    console.log("should update");
+    setShouldUpdatePosts(true);
   };
 
   return (
@@ -45,13 +60,16 @@ function Post({
         className="shadow-md bg-slate-50 p-4 rounded-xl mb-4 break-inside-avoid"
         style={{ maxWidth: maxWidth || "100%" }}>
         <header className="flex justify-between gap-4 items-center">
-          <div className="flex gap-2 items-center">
+          <div className="relative flex gap-2 items-center">
+            <a
+              className="absolute size-full top-0 left-0 z-10"
+              href={routes.userById(userId)}></a>
             <Avatar src={userPhotoUrl} size={40} />
             <span className="font-bold">{userDisplayName}</span>
           </div>
 
           {currentUser && currentUser.uid === userId && (
-            <Dropdown>
+            <Dropdown changeOpen={changeDropdownOpen} open={isDropdownOpen}>
               <Dropdown.Trigger>
                 <Button className="!size-8" isIconOnly variant="transparent">
                   <EllipsisVerticalIcon className="shrink-0" />
@@ -59,6 +77,7 @@ function Post({
               </Dropdown.Trigger>
               <Dropdown.Menu>
                 <Dropdown.Item onClick={onClickEditPost}>Edit</Dropdown.Item>
+                <RemovePost onRemovePost={onRemovePost} post={post} />
               </Dropdown.Menu>
             </Dropdown>
           )}
