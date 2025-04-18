@@ -50,8 +50,6 @@ export class PostsService {
         ...(userPhotoUrl && { userPhotoUrl }),
         userId,
         userDisplayName,
-        rating: { likes: 0, dislikes: 0 },
-        comments: [],
         commentsCount: 0,
         likesCount: 0,
       };

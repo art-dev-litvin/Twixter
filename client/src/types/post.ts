@@ -1,5 +1,3 @@
-import { User } from "firebase/auth";
-
 export interface PostType {
   id: string;
   title: string;
@@ -9,18 +7,10 @@ export interface PostType {
   userId: string;
   userDisplayName: string;
   userPhotoUrl?: string;
-  comments: Comment[];
-  rating: Rating;
 
   commentsCount: number;
   likesCount: number;
 }
-
-type Comment = { user: User; text: string };
-type Rating = {
-  likes: number;
-  dislikes: number;
-};
 
 export interface CreatePostDto {
   title: string;

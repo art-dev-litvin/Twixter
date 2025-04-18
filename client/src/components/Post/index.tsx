@@ -30,8 +30,6 @@ function Post({ post, maxWidth }: PostProps) {
     userId,
     userDisplayName,
     userPhotoUrl,
-    comments,
-    rating,
   } = post;
 
   const [isDropdownOpen, setIsDropdownOpen] = React.useState(false);
@@ -99,18 +97,18 @@ function Post({ post, maxWidth }: PostProps) {
           <div className="flex gap-4">
             <Button className="!size-11 gap-1" isIconOnly variant="transparent">
               <ThumbsUpIcon className="shrink-0 size-5" />
-              {rating.likes}
+              {0}
             </Button>
 
             <Button className="!size-11 gap-1" isIconOnly variant="transparent">
               <ThumbsDownIcon className="shrink-0 size-5" />
-              {rating.dislikes}
+              {0}
             </Button>
           </div>
           <div>
             <Button className="!size-8 gap-1" isIconOnly variant="transparent">
               <MessageSquareIcon className="shrink-0 size-5" />
-              {comments.length}
+              {0}
             </Button>
           </div>
         </div>
