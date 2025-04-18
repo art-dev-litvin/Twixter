@@ -1,4 +1,4 @@
-export class Comment {
+export interface TComment {
   id: string;
   userId: string;
   userDisplayName: string;

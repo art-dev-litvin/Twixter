@@ -6,7 +6,9 @@ import { Comment } from './entities/comment.entity';
 
 @Injectable()
 export class CommentsService {
-  async create(createCommentDto: CreateCommentDto) {
+  async create(
+    createCommentDto: CreateCommentDto,
+  ): Promise<Comment | undefined> {
     const {
       type,
       text,
@@ -40,6 +42,7 @@ export class CommentsService {
         .doc(targetRef.id);
 
       const messageData: Comment = {
+        id: targetRef.id,
         text,
         userId: userId,
         userDisplayName: userDisplayName,
@@ -58,7 +61,7 @@ export class CommentsService {
         t.set(indexRef, indexData);
       });
 
-      return { id: targetRef.id, ...messageData };
+      return messageData;
     } catch (error) {
       if (error instanceof Error) {
         throw new HttpException(error.message, 400);
