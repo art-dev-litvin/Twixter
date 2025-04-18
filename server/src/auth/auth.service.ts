@@ -70,6 +70,8 @@ export class AuthService {
 
       if (username || photoURL) {
         const firestore = admin.firestore();
+
+        // update posts
         const postsRef = firestore.collection('posts');
         const userPostsQuery = postsRef.where('userId', '==', uid);
 
@@ -82,6 +84,30 @@ export class AuthService {
             userPhotoUrl: photoURL || userRecord.photoURL,
           });
         });
+
+        // update comments and replies
+        const collectionsToUpdate = [
+          {
+            ref: firestore.collection('commentsIndex'),
+            pathField: 'commentPath',
+          },
+          { ref: firestore.collection('repliesIndex'), pathField: 'replyPath' },
+        ];
+
+        for (const { ref, pathField } of collectionsToUpdate) {
+          const userQuery = ref.where('userId', '==', uid);
+          const userSnapshot = await userQuery.get();
+
+          userSnapshot.forEach((doc) => {
+            const path = doc.data()[pathField];
+            const docRef = firestore.doc(path);
+
+            batch.update(docRef, {
+              userDisplayName: username || userRecord.displayName,
+              userPhotoUrl: photoURL || userRecord.photoURL,
+            });
+          });
+        }
 
         await batch.commit();
       }
