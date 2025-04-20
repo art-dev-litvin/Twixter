@@ -18,11 +18,9 @@ export class AuthService {
         password,
         displayName: username,
       });
-      const customToken = await auth.createCustomToken(userRecord.uid);
+      const authToken = await auth.createCustomToken(userRecord.uid);
 
-      return {
-        customToken,
-      };
+      return authToken;
     } catch (error) {
       if (error.code === 'auth/email-already-exists') {
         throw new HttpException('Email already exists', HttpStatus.CONFLICT);
@@ -45,7 +43,7 @@ export class AuthService {
     username?: string,
     newPassword?: string,
     profileImageBase64?: string,
-  ): Promise<{ result: string; updatedUser: UserRecord } | undefined> {
+  ): Promise<UserRecord | undefined> {
     const auth = this.firebaseService.getAuth();
     let photoURL: string | undefined = undefined;
 
@@ -112,10 +110,7 @@ export class AuthService {
         await batch.commit();
       }
 
-      return {
-        result: 'Profile updated successfully',
-        updatedUser: userRecord,
-      };
+      return userRecord;
     } catch (error) {
       if (error instanceof FirebaseAuthError) {
         throw new HttpException(error.message, 400);

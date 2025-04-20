@@ -5,7 +5,8 @@ import { ForgotPasswordSchema, ForgotPasswordFields } from "./schema";
 import { toast } from "react-toastify";
 import { routes } from "../../constants/routes";
 import Button from "../Button";
-import { handleForgotPassword } from "../../services/api-requests/handleForgotPassword";
+import { handleForgotPassword } from "../../services/api-requests/auth/handleForgotPassword";
+import { handleResultWithToast } from "../../utils/handleResultWithToast";
 
 function ForgotPasswordForm() {
   const navigate = useNavigate();
@@ -28,10 +29,8 @@ function ForgotPasswordForm() {
 
       setSubmitting(false);
 
-      if ("error" in res) {
-        toast.error(res.error);
-      } else {
-        toast.success(res.result);
+      if (handleResultWithToast(res)) {
+        toast.success("Password reset email sent!");
         navigate(routes.home);
       }
     },

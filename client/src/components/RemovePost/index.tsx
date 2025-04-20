@@ -1,14 +1,15 @@
 import React from "react";
-import { removePost } from "../../services/api-requests/removePost";
+import { removePost } from "../../services/api-requests/posts/removePost";
 import { toast } from "react-toastify";
 import { useState } from "react";
 import Button from "../Button";
 import Popup from "../Popup";
 import Dropdown from "../Dropdown";
-import { PostType } from "../../types/post";
+import { TPost } from "../../types/post";
+import { handleResultWithToast } from "../../utils/handleResultWithToast";
 
 interface RemovePostProps {
-  post: PostType;
+  post: TPost;
   onRemovePost: () => void;
 }
 
@@ -23,13 +24,11 @@ function RemovePost({ post, onRemovePost }: RemovePostProps) {
   const handleRemoveSubmit = async () => {
     setIsLoading(true);
 
-    const data = await removePost(post.id);
+    const res = await removePost(post.id);
 
     setIsLoading(false);
 
-    if (data?.error) {
-      toast.error(data.error);
-    } else {
+    if (handleResultWithToast(res)) {
       onRemovePost();
       toast.success("Post has been removed!");
     }

@@ -1,24 +1,23 @@
 import { useAuth } from "../../contexts/auth/Auth.hook";
-import { PostType } from "../../types/post";
+import { TPost } from "../../types/post";
 import React from "react";
-import { getUserPosts } from "../../services/api-requests/getUserPosts";
-import { toast } from "react-toastify";
+import { getPostsByUser } from "../../services/api-requests/posts/getPostsByUser";
 import UserProfileLayout from "../../components/UserProfileLayout";
 import { usePostsUpdates } from "../../contexts/postsUpdates/postsUpdates.hook";
+import { handleResultWithToast } from "../../utils/handleResultWithToast";
 
 function Profile() {
   const { user } = useAuth();
-  const [userPosts, setUserPosts] = React.useState<PostType[]>([]);
+  const [userPosts, setUserPosts] = React.useState<TPost[]>([]);
   const { shouldUpdatePosts, setShouldUpdatePosts } = usePostsUpdates();
 
   const fetchUserPosts = React.useCallback(async () => {
     if (user) {
-      const data = await getUserPosts(user.uid);
+      const res = await getPostsByUser(user.uid);
 
-      if ("error" in data) {
-        toast.error(data.error);
-      } else {
-        setUserPosts(data.posts);
+      const posts = handleResultWithToast(res);
+      if (posts) {
+        setUserPosts(posts);
       }
     }
   }, [user]);
@@ -32,7 +31,7 @@ function Profile() {
       fetchUserPosts();
       setShouldUpdatePosts(false);
     }
-  }, [shouldUpdatePosts]);
+  }, [shouldUpdatePosts, fetchUserPosts, setShouldUpdatePosts]);
 
   if (!user) {
     return (

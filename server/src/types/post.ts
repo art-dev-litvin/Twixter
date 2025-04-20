@@ -1,4 +1,4 @@
-export interface PostType {
+export interface TPost {
   id: string;
   title: string;
   content: string;

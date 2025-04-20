@@ -1,12 +1,13 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
-import { removeAccount } from "../../services/api-requests/removeAccount";
+import { removeAccount } from "../../services/api-requests/auth/removeAccount";
 import { toast } from "react-toastify";
 import { routes } from "../../constants/routes";
 import { useAuth } from "../../contexts/auth/Auth.hook";
 import { useState } from "react";
 import Button from "../Button";
 import Popup from "../Popup";
+import { handleResultWithToast } from "../../utils/handleResultWithToast";
 
 function RemoveAccount() {
   const navigate = useNavigate();
@@ -21,16 +22,15 @@ function RemoveAccount() {
   const handleRemoveSubmit = async () => {
     setIsLoading(true);
 
-    const { result, error } = await removeAccount();
+    const res = await removeAccount();
 
     setIsLoading(false);
 
-    if (error) {
-      toast.error(error);
-    }
-
-    if (result) {
+    console.log("before toast if", res);
+    if (handleResultWithToast(res) !== undefined) {
+      console.log("before toast");
       toast.success("Account has been removed!");
+      console.log("after toast");
       navigate(routes.home);
     }
   };

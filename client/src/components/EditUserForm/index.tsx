@@ -6,9 +6,10 @@ import FormField from "../FormField";
 import Button from "../Button";
 import { routes } from "../../constants/routes";
 import { useAuth } from "../../contexts/auth/Auth.hook";
-import { updateUser } from "../../services/api-requests/updateUser";
+import { updateUser } from "../../services/api-requests/auth/updateUser";
 import { EditUserFieldsValues, EditUserSchema } from "./schema";
 import Avatar from "../Avatar";
+import { handleResultWithToast } from "../../utils/handleResultWithToast";
 
 function EditUserForm() {
   const { user, setUser } = useAuth();
@@ -32,7 +33,7 @@ function EditUserForm() {
     },
     validationSchema: EditUserSchema,
     onSubmit: async (values, { setSubmitting }) => {
-      const data = await updateUser({
+      const result = await updateUser({
         username: values.username,
         newPassword: values.newPassword?.trim() || undefined,
         uid: user!.uid,
@@ -40,14 +41,15 @@ function EditUserForm() {
 
       setSubmitting(false);
 
-      if ("error" in data) {
-        toast.error(data.error);
-      } else {
-        toast.success(data.result);
+      const updatedUser = handleResultWithToast(result);
+
+      if (updatedUser) {
+        toast.success("User has been updated!");
 
         setUser({
-          ...data.updatedUser,
+          ...updatedUser,
         });
+
         navigate(routes.profile);
       }
     },
@@ -77,20 +79,20 @@ function EditUserForm() {
 
       setSubmitting(true);
 
-      const data = await updateUser({
+      const res = await updateUser({
         profileImage: newAvatar,
         uid: user!.uid,
       });
 
       setSubmitting(false);
 
-      if ("error" in data) {
-        toast.error(data.error);
-      } else {
-        toast.success(data.result);
+      const updatedUser = handleResultWithToast(res);
+
+      if (updatedUser) {
+        toast.success("Avatar has been changed!");
 
         setUser({
-          ...data.updatedUser,
+          ...updatedUser,
         });
       }
     }

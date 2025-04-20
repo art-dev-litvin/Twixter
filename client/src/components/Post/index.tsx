@@ -6,7 +6,7 @@ import {
   ThumbsUpIcon,
 } from "lucide-react";
 import Button from "../Button";
-import { PostType } from "../../types/post";
+import { TPost } from "../../types/post";
 import Dropdown from "../Dropdown";
 import { useNavigate } from "react-router-dom";
 import { auth } from "../../services/firebase";
@@ -14,9 +14,11 @@ import { routes } from "../../constants/routes";
 import RemovePost from "../RemovePost";
 import React from "react";
 import { usePostsUpdates } from "../../contexts/postsUpdates/postsUpdates.hook";
+import Popup from "../Popup";
+import Comments from "../Comments";
 
 interface PostProps {
-  post: PostType;
+  post: TPost;
   maxWidth?: number | string;
 }
 
@@ -110,6 +112,10 @@ function Post({ post, maxWidth }: PostProps) {
               <MessageSquareIcon className="shrink-0 size-5" />
               {0}
             </Button>
+
+            {/*<Popup open={true} onClose={() => {}}>
+              <Comments postId={id} comments={[]} />
+            </Popup>*/}
           </div>
         </div>
         <p className="text-end text-sm text-slate-600">

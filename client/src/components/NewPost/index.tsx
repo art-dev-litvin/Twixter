@@ -2,31 +2,27 @@ import React from "react";
 import Button from "../Button";
 import Popup from "../Popup";
 import PostForm from "../PostForm";
-import { createPost } from "../../services/api-requests/createPost";
+import { createPost } from "../../services/api-requests/posts/createPost";
 import { toast } from "react-toastify";
-import { PostType } from "../../types/post";
 import { PostFormFields } from "../PostForm/schema";
+import { handleResultWithToast } from "../../utils/handleResultWithToast";
+import { usePostsUpdates } from "../../contexts/postsUpdates/postsUpdates.hook";
 
-interface NewPostProps {
-  setPosts: React.Dispatch<React.SetStateAction<PostType[]>>;
-}
-
-function NewPost({ setPosts }: NewPostProps) {
+function NewPost() {
   const [openPopup, setOpenPopup] = React.useState(false);
+  const { setShouldUpdatePosts } = usePostsUpdates();
 
   const handlePopup = (open: boolean) => () => {
     setOpenPopup(open);
   };
 
   const handleSubmit = async (values: PostFormFields) => {
-    const data = await createPost(values);
+    const res = await createPost(values);
 
-    if ("error" in data) {
-      toast.error(data.error);
-    } else {
-      setPosts((prev) => [...prev, data]);
+    const newPost = handleResultWithToast(res);
+    if (newPost) {
       toast.success("Post created!");
-
+      setShouldUpdatePosts(true);
       setOpenPopup(false);
     }
   };

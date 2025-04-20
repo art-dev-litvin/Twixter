@@ -5,12 +5,12 @@ import Button from "../Button";
 import { routes } from "../../constants/routes";
 import PostsGrid from "../PostsGrid";
 import { User } from "firebase/auth";
-import { PostType } from "../../types/post";
+import { TPost } from "../../types/post";
 import { useAuth } from "../../contexts/auth/Auth.hook";
 
 interface UserProfileLayoutProps {
   user: User;
-  posts: PostType[];
+  posts: TPost[];
 }
 
 function UserProfileLayout({ user, posts }: UserProfileLayoutProps) {

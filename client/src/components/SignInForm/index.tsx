@@ -3,11 +3,12 @@ import { useNavigate } from "react-router-dom";
 import { useFormik } from "formik";
 import { SignInFormValues } from "./types";
 import { SignInSchema } from "./schema";
-import { signIn } from "../../services/api-requests/signIn";
+import { signIn } from "../../services/api-requests/auth/signIn";
 import { toast } from "react-toastify";
 import { routes } from "../../constants/routes";
 import Button from "../Button";
 import ForgotPasswordLink from "../ForgotPasswordLink";
+import { handleResultWithToast } from "../../utils/handleResultWithToast";
 
 function SignInForm() {
   const navigate = useNavigate();
@@ -27,15 +28,11 @@ function SignInForm() {
     },
     validationSchema: SignInSchema,
     onSubmit: async (values, { setSubmitting }) => {
-      const { user, error } = await signIn(values.email, values.password);
+      const res = await signIn(values.email, values.password);
 
       setSubmitting(false);
 
-      if (error) {
-        toast.error(error);
-      }
-
-      if (user) {
+      if (handleResultWithToast(res)) {
         toast.success("Sign in successful!");
         navigate(routes.home);
       }

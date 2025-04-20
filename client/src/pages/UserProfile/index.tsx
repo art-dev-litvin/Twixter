@@ -1,27 +1,26 @@
-import { PostType } from "../../types/post";
+import { TPost } from "../../types/post";
 import React from "react";
-import { getUserPosts } from "../../services/api-requests/getUserPosts";
-import { toast } from "react-toastify";
+import { getPostsByUser } from "../../services/api-requests/posts/getPostsByUser";
 import UserProfileLayout from "../../components/UserProfileLayout";
-import { getUserById } from "../../services/api-requests/getUser";
+import { getUserById } from "../../services/api-requests/auth/getUserById";
 import { useParams } from "react-router-dom";
 import { User } from "firebase/auth";
+import { handleResultWithToast } from "../../utils/handleResultWithToast";
 
 function UserProfile() {
   const params = useParams();
-  const [userPosts, setUserPosts] = React.useState<PostType[]>([]);
+  const [userPosts, setUserPosts] = React.useState<TPost[]>([]);
   const [user, setUser] = React.useState<User | null>(null);
   const userId = React.useMemo(() => params.id, [params.id]);
 
   React.useEffect(() => {
     if (user) {
       const fetchUserPosts = async () => {
-        const data = await getUserPosts(user.uid);
+        const result = await getPostsByUser(user.uid);
 
-        if ("error" in data) {
-          toast.error(data.error);
-        } else {
-          setUserPosts(data.posts);
+        const posts = handleResultWithToast(result);
+        if (posts) {
+          setUserPosts(posts);
         }
       };
 
@@ -32,12 +31,12 @@ function UserProfile() {
   React.useEffect(() => {
     const fetchUser = async () => {
       if (userId) {
-        const data = await getUserById(userId);
+        const result = await getUserById(userId);
 
-        if ("error" in data) {
-          toast.error(data.error);
-        } else {
-          setUser(data);
+        const user = handleResultWithToast(result);
+
+        if (user) {
+          setUser(user);
         }
       }
     };

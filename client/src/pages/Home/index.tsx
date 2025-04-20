@@ -1,17 +1,17 @@
 import React from "react";
 import NewPost from "../../components/NewPost";
-import { PostsSortByType, PostType } from "../../types/post";
-import { getPosts } from "../../services/api-requests/getPosts";
-import { toast } from "react-toastify";
+import { PostsSortByType, TPost } from "../../types/post";
+import { getPosts } from "../../services/api-requests/posts/getPosts";
 import PostsGrid from "../../components/PostsGrid";
 import PostsSortBy from "../../components/PostsSortBySelect";
 import Pagination from "../../components/Pagination";
 import { postsLimitPerPage } from "../../constants/postsLimitPerPage";
 import { useSearchParams } from "react-router-dom";
 import { usePostsUpdates } from "../../contexts/postsUpdates/postsUpdates.hook";
+import { handleResultWithToast } from "../../utils/handleResultWithToast";
 
 function Home() {
-  const [posts, setPosts] = React.useState<PostType[]>([]);
+  const [posts, setPosts] = React.useState<TPost[]>([]);
   const [isLoading, setIsLoading] = React.useState(true);
   const [searchParams] = useSearchParams();
   const [currentPageIndex, setCurrentPageIndex] = React.useState(0);
@@ -25,20 +25,20 @@ function Home() {
     async (sortBy: PostsSortByType | null) => {
       const cursor = pageCursorsHistory[currentPageIndex];
 
-      const data = await getPosts({
+      const res = await getPosts({
         sortBy,
         limit: postsLimitPerPage,
         cursor: cursor,
       });
 
-      if ("error" in data) {
-        toast.error(data.error);
-      } else {
-        setPosts(data.posts);
-        window.scrollTo({ top: 0 });
-        setIsEndReached(data.posts.length < postsLimitPerPage);
+      const posts = handleResultWithToast(res);
 
-        const nextCursor = data.posts[data.posts.length - 1]?.id;
+      if (posts) {
+        setPosts(posts);
+        window.scrollTo({ top: 0 });
+        setIsEndReached(posts.length < postsLimitPerPage);
+
+        const nextCursor = posts[posts.length - 1]?.id;
 
         if (nextCursor && !pageCursorsHistory.includes(nextCursor)) {
           setPageCursorsHistory((prev) => {
@@ -51,7 +51,7 @@ function Home() {
 
       setIsLoading(false);
     },
-    []
+    [currentPageIndex, pageCursorsHistory]
   );
 
   React.useEffect(() => {
@@ -60,14 +60,14 @@ function Home() {
     const sortBy = searchParams.get("sortBy") as PostsSortByType | null;
 
     fetchPosts(sortBy);
-  }, [searchParams]);
+  }, [searchParams, fetchPosts]);
 
   React.useEffect(() => {
     if (shouldUpdatePosts) {
       fetchPosts(null);
       setShouldUpdatePosts(false);
     }
-  }, [shouldUpdatePosts]);
+  }, [shouldUpdatePosts, fetchPosts, setShouldUpdatePosts]);
 
   const goToPrevPage = () => {
     if (currentPageIndex > 0) {
@@ -85,7 +85,7 @@ function Home() {
     <div>
       <h1 className="text-4xl text-center font-bold mb-8">Home page</h1>
       <div className="mb-8 pb-4 border-b border-slate-200 flex justify-between items-center">
-        <NewPost setPosts={setPosts} />
+        <NewPost />
         <div className="flex gap-4 items-center">
           <PostsSortBy />
           <span className="font-bold">Page {currentPageIndex + 1}</span>

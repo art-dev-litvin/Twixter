@@ -4,9 +4,10 @@ import { SignUpFormValues } from "./types";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
 import { routes } from "../../constants/routes";
-import { signUp } from "../../services/api-requests/signUp";
+import { signUp } from "../../services/api-requests/auth/signUp";
 import FormField from "../FormField";
 import Button from "../Button";
+import { handleResultWithToast } from "../../utils/handleResultWithToast";
 
 function SignUpForm() {
   const navigate = useNavigate();
@@ -27,19 +28,11 @@ function SignUpForm() {
     },
     validationSchema: SignUpSchema,
     onSubmit: async (values, { setSubmitting }) => {
-      const { user, error } = await signUp(
-        values.username,
-        values.email,
-        values.password
-      );
+      const res = await signUp(values.username, values.email, values.password);
 
       setSubmitting(false);
 
-      if (error) {
-        toast.error(error);
-      }
-
-      if (user) {
+      if (handleResultWithToast(res)) {
         toast.success("Sign up successful!");
         navigate(routes.emailVerification);
       }

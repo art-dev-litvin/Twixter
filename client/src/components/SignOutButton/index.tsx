@@ -1,9 +1,10 @@
 import { LogOutIcon } from "lucide-react";
 import classNames from "classnames";
-import { signout } from "../../services/api-requests/signout";
+import { signout } from "../../services/api-requests/auth/signout";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
 import { routes } from "../../constants/routes";
+import { handleResultWithToast } from "../../utils/handleResultWithToast";
 
 interface SignOutButtonProps {
   className?: string;
@@ -13,15 +14,11 @@ function SignOutButton({ className }: SignOutButtonProps) {
   const navigate = useNavigate();
 
   const handleClick = async () => {
-    const { error, result } = await signout();
+    const res = await signout();
 
-    if (error) {
-      toast.error(error);
-    }
-
-    if (result) {
+    if (handleResultWithToast(res)) {
       navigate(routes.home);
-      toast.success(result);
+      toast.success("You're signed out");
     }
   };
 

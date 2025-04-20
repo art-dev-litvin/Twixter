@@ -1,8 +1,8 @@
-import { PostType } from "../../types/post";
+import { TPost } from "../../types/post";
 import Post from "../Post";
 
 interface PostsGridProps {
-  posts: PostType[];
+  posts: TPost[];
 }
 
 function PostsGrid({ posts }: PostsGridProps) {

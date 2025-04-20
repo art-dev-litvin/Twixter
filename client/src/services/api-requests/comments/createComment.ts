@@ -2,12 +2,12 @@ import axios, { AxiosResponse } from "axios";
 import { apiPaths } from "../../constants/api-paths";
 import { PostFormFields } from "../../components/PostForm/schema";
 import { getErrorMessage } from "../../utils/getErrorMessage";
-import { CreatePostDto, PostType } from "../../types/post";
+import { CreatePostDto, TPost } from "../../types/post";
 import { auth } from "../firebase";
 
 const createPost = async (
   values: PostFormFields
-): Promise<PostType | { error: string }> => {
+): Promise<TPost | { error: string }> => {
   const user = auth?.currentUser;
   if (user) {
     try {
@@ -15,8 +15,8 @@ const createPost = async (
       const { displayName, photoURL, uid } = user;
 
       const { data: newPost } = await axios.post<
-        PostType,
-        AxiosResponse<PostType>,
+        TPost,
+        AxiosResponse<TPost>,
         CreatePostDto
       >(apiPaths.posts.new, {
         title,

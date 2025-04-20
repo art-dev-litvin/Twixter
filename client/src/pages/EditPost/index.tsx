@@ -1,16 +1,17 @@
 import PostForm from "../../components/PostForm";
 import { PostFormFields } from "../../components/PostForm/schema";
 import { toast } from "react-toastify";
-import { updatePost } from "../../services/api-requests/updatePost";
+import { updatePost } from "../../services/api-requests/posts/updatePost";
 import { useParams } from "react-router-dom";
 import React from "react";
 import Card from "../../components/Card";
-import { PostType } from "../../types/post";
-import { getPost } from "../../services/api-requests/getPost";
+import { TPost } from "../../types/post";
+import { getPost } from "../../services/api-requests/posts/getPost";
+import { handleResultWithToast } from "../../utils/handleResultWithToast";
 
 function EditPost() {
   const params = useParams();
-  const [post, setPost] = React.useState<PostType | null>(null);
+  const [post, setPost] = React.useState<TPost | null>(null);
   const [loading, setLoading] = React.useState(true);
 
   React.useEffect(() => {
@@ -18,12 +19,11 @@ function EditPost() {
       const postId = params.id;
 
       if (postId) {
-        const data = await getPost(postId);
+        const res = await getPost(postId);
 
-        if ("error" in data) {
-          toast.error(data.error);
-        } else {
-          setPost(data.post);
+        const post = handleResultWithToast(res);
+        if (post) {
+          setPost(post);
         }
       }
 
@@ -38,15 +38,12 @@ function EditPost() {
       ...values,
       oldImageUrl: post?.imageUrl,
     });
-    const data = await updatePost(post!.id, {
+    const res = await updatePost(post!.id, {
       ...values,
       oldImageUrl: post?.imageUrl,
     });
 
-    if ("error" in data) {
-      toast.error(data.error);
-    } else {
-      // success action
+    if (handleResultWithToast(res)) {
       toast.success("Post updated!");
     }
   };

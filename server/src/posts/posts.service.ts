@@ -2,7 +2,7 @@ import * as admin from 'firebase-admin';
 import { HttpException, Injectable } from '@nestjs/common';
 import { parseBase64Image } from 'src/utils/parseBase64Image';
 import { uploadBase64ToFirebaseStorage } from 'src/utils/uploadBase64ToFirebaseStorage';
-import { PostType } from 'src/types/post';
+import { TPost } from 'src/types/post';
 import { UpdatePostDto } from './dtos/update-post.dto';
 
 @Injectable()
@@ -41,7 +41,7 @@ export class PostsService {
         );
       }
 
-      const newPost: PostType = {
+      const newPost: TPost = {
         id: postId,
         title,
         content,
@@ -103,7 +103,7 @@ export class PostsService {
       return { ...data, createdAt };
     });
 
-    return { posts };
+    return posts;
   }
 
   async getPostsByUser(userId: string) {
@@ -121,7 +121,7 @@ export class PostsService {
         return { ...data, createdAt };
       });
 
-      return { posts };
+      return posts;
     } catch (error) {
       throw new HttpException(
         `Failed to get posts by user: ${error.message}`,
@@ -144,7 +144,7 @@ export class PostsService {
 
       const postData = postDoc.data();
 
-      return { post: postData };
+      return postData;
     } catch (error) {
       throw new HttpException(`Failed to get post: ${error.message}`, 400);
     }

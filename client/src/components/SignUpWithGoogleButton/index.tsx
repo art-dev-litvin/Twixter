@@ -1,9 +1,10 @@
 import { PropsWithChildren } from "react";
 import GoogleLogoImg from "../../assets/google-logo.webp";
-import { signInWithGoogle } from "../../services/api-requests/signInWithGoogle";
+import { signInWithGoogle } from "../../services/api-requests/auth/signInWithGoogle";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
 import { routes } from "../../constants/routes";
+import { handleResultWithToast } from "../../utils/handleResultWithToast";
 
 function SignUpWithGoogleButton({
   children,
@@ -12,13 +13,9 @@ function SignUpWithGoogleButton({
   const navigate = useNavigate();
 
   const onClick = async () => {
-    const { user, error } = await signInWithGoogle();
+    const res = await signInWithGoogle();
 
-    if (error) {
-      toast.error(error);
-    }
-
-    if (user) {
+    if (handleResultWithToast(res)) {
       const successText =
         authMethod === "signup"
           ? "Sign up with google successful!"
