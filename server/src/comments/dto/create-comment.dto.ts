@@ -1,4 +1,5 @@
 import { IsNotEmpty, IsOptional, IsString } from 'class-validator';
+import { UserRecord } from 'firebase-admin/auth';
 
 export class CreateCommentDto {
   @IsNotEmpty()
@@ -18,14 +19,5 @@ export class CreateCommentDto {
   postId: string;
 
   @IsNotEmpty()
-  @IsString()
-  userId: string;
-
-  @IsNotEmpty()
-  @IsString()
-  userDisplayName: string;
-
-  @IsOptional()
-  @IsString()
-  userPhotoUrl?: string;
+  user: UserRecord;
 }

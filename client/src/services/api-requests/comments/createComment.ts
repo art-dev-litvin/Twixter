@@ -1,39 +1,14 @@
-import axios, { AxiosResponse } from "axios";
-import { apiPaths } from "../../constants/api-paths";
-import { PostFormFields } from "../../components/PostForm/schema";
-import { getErrorMessage } from "../../utils/getErrorMessage";
-import { CreatePostDto, TPost } from "../../types/post";
-import { auth } from "../firebase";
+import { apiPaths } from "../../../constants/api-paths";
+import { ApiResponse } from "../../../types/api";
+import { CreateCommentDto, TComment } from "../../../types/comment";
+import { apiRequest } from "../../../utils/apiRequest";
 
-const createPost = async (
-  values: PostFormFields
-): Promise<TPost | { error: string }> => {
-  const user = auth?.currentUser;
-  if (user) {
-    try {
-      const { title, content, imageBase64 } = values;
-      const { displayName, photoURL, uid } = user;
-
-      const { data: newPost } = await axios.post<
-        TPost,
-        AxiosResponse<TPost>,
-        CreatePostDto
-      >(apiPaths.posts.new, {
-        title,
-        content,
-        imageBase64,
-        userId: uid,
-        userDisplayName: displayName || "Username",
-        userPhotoUrl: photoURL || undefined,
-      });
-
-      return newPost;
-    } catch (error) {
-      return getErrorMessage(error);
-    }
-  } else {
-    return { error: "You are no authenticated" };
-  }
+export const createComment = (
+  createCommentDto: CreateCommentDto
+): ApiResponse<TComment> => {
+  return apiRequest<TComment>({
+    method: "POST",
+    url: apiPaths.comments.new,
+    data: createCommentDto,
+  });
 };
-
-export { createPost };

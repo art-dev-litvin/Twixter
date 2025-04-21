@@ -7,7 +7,7 @@ import {
 import * as admin from 'firebase-admin';
 
 @Injectable()
-export class AuthGuard implements CanActivate {
+export class FirebaseAuthGuard implements CanActivate {
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const req = context.switchToHttp().getRequest();
     const authHeader = req.headers.authorization;

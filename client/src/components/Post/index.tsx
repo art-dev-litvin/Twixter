@@ -36,9 +36,14 @@ function Post({ post, maxWidth }: PostProps) {
 
   const [isDropdownOpen, setIsDropdownOpen] = React.useState(false);
   const { setShouldUpdatePosts } = usePostsUpdates();
+  const [isOpenComments, setIsOpenComments] = React.useState(false);
 
   const navigate = useNavigate();
   const currentUser = auth.currentUser;
+
+  const changeCommentsPopupOpen = (newOpen: boolean) => () => {
+    setIsOpenComments(newOpen);
+  };
 
   const changeDropdownOpen = (newOpen: boolean) => {
     setIsDropdownOpen(newOpen);
@@ -108,14 +113,20 @@ function Post({ post, maxWidth }: PostProps) {
             </Button>
           </div>
           <div>
-            <Button className="!size-8 gap-1" isIconOnly variant="transparent">
+            <Button
+              onClick={changeCommentsPopupOpen(true)}
+              className="!size-8 gap-1"
+              isIconOnly
+              variant="transparent">
               <MessageSquareIcon className="shrink-0 size-5" />
               {0}
             </Button>
 
-            {/*<Popup open={true} onClose={() => {}}>
-              <Comments postId={id} comments={[]} />
-            </Popup>*/}
+            <Popup
+              open={isOpenComments}
+              onClose={changeCommentsPopupOpen(false)}>
+              <Comments postId={id} isOpenedComments={isOpenComments} />
+            </Popup>
           </div>
         </div>
         <p className="text-end text-sm text-slate-600">

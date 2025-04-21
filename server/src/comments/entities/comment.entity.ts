@@ -5,4 +5,5 @@ export class Comment {
   userPhotoUrl?: string;
   text: string;
   createdAt: Date;
+  updatedAt: Date;
 }

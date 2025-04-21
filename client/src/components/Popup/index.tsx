@@ -8,6 +8,14 @@ interface PopupProps {
 }
 
 function Popup({ onClose, open, children }: PopupProps) {
+  React.useEffect(() => {
+    if (open) {
+      document.body.style.overflowY = "hidden";
+    } else {
+      document.body.style.overflowY = "visible";
+    }
+  }, [open]);
+
   return (
     <div
       className={classNames("transition-opacity", {
