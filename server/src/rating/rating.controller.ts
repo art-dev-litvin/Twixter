@@ -4,10 +4,10 @@ import { CreateRatingDto } from './dto/create-rating.dto';
 import { FirebaseAuthGuard } from 'src/firebase/firebase-auth.guard';
 
 @Controller('rating')
-@UseGuards(FirebaseAuthGuard)
 export class RatingController {
   constructor(private readonly ratingService: RatingService) {}
 
+  @UseGuards(FirebaseAuthGuard)
   @Post()
   async ratePost(@Body() createRatingDto: CreateRatingDto) {
     await this.ratingService.ratePost(createRatingDto);

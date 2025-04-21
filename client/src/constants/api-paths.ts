@@ -22,4 +22,8 @@ export const apiPaths = {
     updateOne: (postId: string, commentId: string) =>
       BASE_URL + `/comments/post/${postId}/comment/${commentId}`, // PATCH
   },
+  rating: {
+    addNewOne: BASE_URL + "/rating", // POST
+    getCountByPostId: (postId: string) => BASE_URL + `/rating/post/${postId}`, // GET
+  },
 };

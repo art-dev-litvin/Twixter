@@ -1,10 +1,5 @@
 import Avatar from "../Avatar";
-import {
-  EllipsisVerticalIcon,
-  MessageSquareIcon,
-  ThumbsDownIcon,
-  ThumbsUpIcon,
-} from "lucide-react";
+import { EllipsisVerticalIcon, MessageSquareIcon } from "lucide-react";
 import Button from "../Button";
 import { TPost } from "../../types/post";
 import Dropdown from "../Dropdown";
@@ -16,6 +11,7 @@ import React from "react";
 import { usePostsUpdates } from "../../contexts/postsUpdates/postsUpdates.hook";
 import Popup from "../Popup";
 import Comments from "../Comments";
+import Rating from "../Rating";
 
 interface PostProps {
   post: TPost;
@@ -101,17 +97,8 @@ function Post({ post, maxWidth }: PostProps) {
           <p className="mt-2 text-base">{content}</p>
         </section>
         <div className="mt-4 flex justify-between">
-          <div className="flex gap-4">
-            <Button className="!size-11 gap-1" isIconOnly variant="transparent">
-              <ThumbsUpIcon className="shrink-0 size-5" />
-              {0}
-            </Button>
+          <Rating postId={id} />
 
-            <Button className="!size-11 gap-1" isIconOnly variant="transparent">
-              <ThumbsDownIcon className="shrink-0 size-5" />
-              {0}
-            </Button>
-          </div>
           <div>
             <Button
               onClick={changeCommentsPopupOpen(true)}
