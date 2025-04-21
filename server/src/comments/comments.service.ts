@@ -64,19 +64,42 @@ export class CommentsService {
     }
   }
 
-  async findAll(postId: string) {
+  async findAll(
+    postId: string,
+    type: 'replies' | 'comments',
+    parentCommentId?: string,
+  ) {
     try {
-      const commentsCollectionRef = admin
-        .firestore()
-        .collection('posts')
-        .doc(postId)
-        .collection('comments');
+      const firestore = admin.firestore();
 
-      const commentsQuery = commentsCollectionRef.orderBy('createdAt', 'desc');
+      let collectionRef;
 
-      const commentsSnap = await commentsQuery.get();
+      if (type === 'comments') {
+        collectionRef = firestore
+          .collection('posts')
+          .doc(postId)
+          .collection('comments');
+      } else if (type === 'replies') {
+        if (!parentCommentId) {
+          throw new HttpException(
+            'parentCommentId is required for replies',
+            400,
+          );
+        }
+        collectionRef = firestore
+          .collection('posts')
+          .doc(postId)
+          .collection('comments')
+          .doc(parentCommentId)
+          .collection('replies');
+      } else {
+        throw new HttpException('Invalid type argument', 400);
+      }
 
-      const comments = commentsSnap.docs.map((doc) => {
+      const query = collectionRef.orderBy('createdAt', 'desc');
+      const snapshot = await query.get();
+
+      const items = snapshot.docs.map((doc) => {
         const data = doc.data();
         const createdAt = data.createdAt.toDate();
         const updatedAt = data.updatedAt.toDate();
@@ -89,7 +112,7 @@ export class CommentsService {
         };
       });
 
-      return comments;
+      return items;
     } catch (error) {
       if (error instanceof Error) {
         throw new HttpException(error.message, 400);
@@ -146,21 +169,6 @@ export class CommentsService {
         .doc(commentId);
 
       await commentRef.delete();
-
-      //const repliesRef = commentRef.collection('replies');
-
-      // Delete all replies in the subcollection
-      //const repliesSnap = await repliesRef.get();
-      //const batch = firestore.batch();
-
-      //repliesSnap.forEach((doc) => {
-      //  batch.delete(doc.ref);
-      //});
-
-      //// Delete the comment itself
-      //batch.delete(commentRef);
-
-      //await batch.commit();
     } catch (error) {
       if (error instanceof Error) {
         throw new HttpException(error.message, 400);

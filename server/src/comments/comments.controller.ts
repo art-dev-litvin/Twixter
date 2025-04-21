@@ -8,6 +8,7 @@ import {
   Delete,
   UseGuards,
   Req,
+  Query,
 } from '@nestjs/common';
 import { CommentsService } from './comments.service';
 import { CreateCommentDto } from './dto/create-comment.dto';
@@ -18,15 +19,19 @@ import { UpdateCommentDto } from './dto/update-comment.dto';
 export class CommentsController {
   constructor(private readonly commentsService: CommentsService) {}
 
-  @UseGuards(FirebaseAuthGuard)
+  //@UseGuards(FirebaseAuthGuard)
   @Post('/new')
   create(@Body() createCommentDto: CreateCommentDto) {
     return this.commentsService.create(createCommentDto);
   }
 
   @Get('/post/:id')
-  findOne(@Param('id') postId: string) {
-    return this.commentsService.findAll(postId);
+  findOne(
+    @Param('id') postId: string,
+    @Query('type') type: 'replies' | 'comments',
+    @Query('parentCommentId') parentCommentId?: string,
+  ) {
+    return this.commentsService.findAll(postId, type, parentCommentId);
   }
 
   @Patch('/post/:postId/comment/:commentId')

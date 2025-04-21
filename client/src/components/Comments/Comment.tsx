@@ -5,6 +5,8 @@ import Button from "../Button";
 import Dropdown from "../Dropdown";
 import { deleteComment } from "../../services/api-requests/comments/deleteComment";
 import { handleResultWithToast } from "../../utils/handleResultWithToast";
+import React from "react";
+import { getCommentsByPostId } from "../../services/api-requests/comments/getCommentsByPostId";
 
 interface CommentProps {
   comment: TComment;
@@ -16,16 +18,36 @@ interface CommentProps {
       type: "reply" | "edit" | null;
     }>
   >;
+  isReply?: boolean;
+  myReplies: {
+    parentCommentId: string;
+    replies: TComment[];
+  }[];
 }
 
-function Comment({
-  comment,
-  postId,
-  setComments,
-  setActiveComment,
-}: CommentProps) {
+function Comment(props: CommentProps) {
+  const { comment, postId, setComments, setActiveComment, isReply, myReplies } =
+    props;
   const { id, text, createdAt, updatedAt, userDisplayName, userPhotoUrl } =
     comment;
+  const [areAllRepliesShown, setAreAllRepliesShown] = React.useState(false);
+  const [allReplies, setAllReplies] = React.useState<TComment[]>([]);
+
+  const fetchReplies = React.useCallback(async () => {
+    const res = await getCommentsByPostId(postId, "replies", id);
+
+    const data = handleResultWithToast(res);
+
+    if (data) {
+      setAllReplies(data);
+    }
+  }, [id, postId]);
+
+  React.useEffect(() => {
+    if (areAllRepliesShown && !allReplies.length) {
+      fetchReplies();
+    }
+  }, [areAllRepliesShown, allReplies.length, fetchReplies]);
 
   const onDeleteComment = async () => {
     const res = await deleteComment(postId, id);
@@ -38,6 +60,18 @@ function Comment({
   const onClickEdit = () => {
     setActiveComment({ comment, type: "edit" });
   };
+
+  const onClickReply = () => {
+    setActiveComment({ comment, type: "reply" });
+  };
+
+  const onToggleShowReplies = () => {
+    setAreAllRepliesShown((prev) => !prev);
+  };
+
+  const myRepliesByCommentId = myReplies.find(
+    ({ parentCommentId }) => parentCommentId === comment.id
+  );
 
   return (
     <div className="flex gap-2 pr-4">
@@ -52,28 +86,62 @@ function Comment({
             <span className="text-xs text-gray-500">
               {new Date(updatedAt || createdAt).toLocaleDateString()}
             </span>
-            <button className="text-sm font-bold cursor-pointer hover:underline">
-              Reply
-            </button>
+            {!isReply && (
+              <button
+                onClick={onClickReply}
+                className="text-sm font-bold cursor-pointer hover:underline">
+                Reply
+              </button>
+            )}
           </div>
+          {!isReply &&
+            myRepliesByCommentId?.replies?.map((reply) => (
+              <Comment
+                key={`${postId}-${myRepliesByCommentId.parentCommentId}-${reply.id}`}
+                {...props}
+                isReply
+                comment={reply}
+              />
+            ))}
+          {!isReply && (
+            <>
+              {areAllRepliesShown &&
+                allReplies.map((reply) => (
+                  <Comment
+                    key={`${postId}-${id}-${reply.id}`}
+                    {...props}
+                    isReply
+                    comment={reply}
+                  />
+                ))}
+              <button
+                onClick={onToggleShowReplies}
+                className="pl-8 relative inline-flex w-fit text-sm font-semibold hover:underline cursor-pointer">
+                <span className="bg-black absolute h-[1px] w-6 top-1/2 -translate-y-1/2 left-0" />
+                {areAllRepliesShown ? "Hide replies" : "Show all replies"}
+              </button>
+            </>
+          )}
         </div>
       </div>
-      <div>
-        <Dropdown>
-          <Dropdown.Trigger>
-            <Button
-              isIconOnly
-              variant="transparent"
-              className="!size-8 !rounded-full bg-transparent">
-              <EllipsisVerticalIcon />
-            </Button>
-          </Dropdown.Trigger>
-          <Dropdown.Menu>
-            <Dropdown.Item onClick={onClickEdit}>Edit</Dropdown.Item>
-            <Dropdown.Item onClick={onDeleteComment}>Delete</Dropdown.Item>
-          </Dropdown.Menu>
-        </Dropdown>
-      </div>
+      {!isReply && (
+        <div>
+          <Dropdown>
+            <Dropdown.Trigger>
+              <Button
+                isIconOnly
+                variant="transparent"
+                className="!size-8 !rounded-full bg-transparent">
+                <EllipsisVerticalIcon />
+              </Button>
+            </Dropdown.Trigger>
+            <Dropdown.Menu>
+              <Dropdown.Item onClick={onClickEdit}>Edit</Dropdown.Item>
+              <Dropdown.Item onClick={onDeleteComment}>Delete</Dropdown.Item>
+            </Dropdown.Menu>
+          </Dropdown>
+        </div>
+      )}
     </div>
   );
 }

@@ -96,13 +96,15 @@ function Home() {
         <h2 className="text-xl">No posts yet :/</h2>
       )}
       <PostsGrid posts={posts} />
-      <Pagination
-        currentPageIndex={currentPageIndex}
-        onNext={goToNextPage}
-        onPrev={goToPrevPage}
-        isPrevDisabled={isLoading || currentPageIndex === 0}
-        isNextDisabled={isLoading || isEndReached}
-      />
+      {!isLoading && posts.length && (
+        <Pagination
+          currentPageIndex={currentPageIndex}
+          onNext={goToNextPage}
+          onPrev={goToPrevPage}
+          isPrevDisabled={isLoading || currentPageIndex === 0}
+          isNextDisabled={isLoading || isEndReached}
+        />
+      )}
     </div>
   );
 }

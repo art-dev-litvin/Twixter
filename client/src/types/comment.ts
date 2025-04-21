@@ -13,6 +13,7 @@ export interface TComment {
 export interface CreateCommentDto {
   text: string;
   type: "comment" | "reply";
+  parentCommentId?: string;
   postId: string;
   user: User;
 }

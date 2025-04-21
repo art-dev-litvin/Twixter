@@ -24,9 +24,12 @@ function Comments({ postId, isOpenedComments }: CommentsProps) {
     comment: TComment | null;
     type: "reply" | "edit" | null;
   }>({ comment: null, type: null });
+  const [myReplies, setMyReplies] = React.useState<
+    { parentCommentId: string; replies: TComment[] }[]
+  >([]);
 
   const fetchComments = React.useCallback(async () => {
-    const res = await getCommentsByPostId(postId);
+    const res = await getCommentsByPostId(postId, "comments");
 
     const data = handleResultWithToast(res);
 
@@ -58,6 +61,11 @@ function Comments({ postId, isOpenedComments }: CommentsProps) {
       const createCommentDto: CreateCommentDto = {
         text: commentInputValue,
         type: "comment",
+        ...(activeComment.type === "reply" &&
+          activeComment.comment && {
+            parentCommentId: activeComment.comment.id,
+            type: "reply",
+          }),
         postId: postId,
         user: currentUser,
       };
@@ -68,7 +76,36 @@ function Comments({ postId, isOpenedComments }: CommentsProps) {
 
       if (createdComment) {
         setCommentInputValue("");
-        setComments((prev) => [createdComment, ...prev]);
+
+        if (activeComment.type === "reply") {
+          setMyReplies((prev) => {
+            const existingReplies = prev.find(
+              (reply) => reply.parentCommentId === activeComment.comment!.id
+            );
+
+            if (existingReplies) {
+              return prev.map((reply) =>
+                reply.parentCommentId === activeComment.comment!.id
+                  ? {
+                      ...reply,
+                      replies: [createdComment, ...reply.replies],
+                    }
+                  : reply
+              );
+            }
+
+            return [
+              {
+                parentCommentId: activeComment.comment!.id,
+                replies: [createdComment],
+              },
+              ...prev,
+            ];
+          });
+          setActiveComment({ comment: null, type: null });
+        } else {
+          setComments((prev) => [createdComment, ...prev]);
+        }
       }
     }
   };
@@ -91,7 +128,6 @@ function Comments({ postId, isOpenedComments }: CommentsProps) {
       setComments((prev) =>
         prev.map((com) => {
           if (com.id === updatedComment.id) {
-            console.log(updatedComment);
             return updatedComment;
           }
           return com;
@@ -111,6 +147,7 @@ function Comments({ postId, isOpenedComments }: CommentsProps) {
         <div className="overflow-y-auto h-full flex flex-col gap-4">
           {comments.map((comment) => (
             <Comment
+              myReplies={myReplies}
               setActiveComment={setActiveComment}
               key={comment.id}
               postId={postId}
