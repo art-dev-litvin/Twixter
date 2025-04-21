@@ -19,13 +19,17 @@ jobs:
         with:
           node-version: 18
 
+      - name: Navigate to Client Directory
+        run: cd client
+
       - name: Install dependencies
-        run: pnpm install
+        run: npm install
         env:
           CI: true
 
       - name: Build Client
-        run: pnpm run build
+        run: npm run build
+        working-directory: client
 
       - name: Deploy to Firebase Hosting
         uses: FirebaseExtended/action-hosting-deploy@v0
@@ -34,3 +38,4 @@ jobs:
           firebaseServiceAccount: "${{ secrets.FIREBASE_SERVICE_ACCOUNT }}"
           channelId: live
           projectId: "${{ secrets.FIREBASE_PROJECT_ID }}"
+        working-directory: client
