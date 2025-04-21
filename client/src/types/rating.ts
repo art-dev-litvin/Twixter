@@ -3,7 +3,7 @@ export interface TRating {
   dislikes: number;
 }
 
-export interface AddNewRatingDto {
+export interface UpdateRatingDto {
   postId: string;
   userId: string;
   ratingType: "like" | "dislike";
