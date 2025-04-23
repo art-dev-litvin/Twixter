@@ -23,7 +23,7 @@
     }
   ],
   "hosting": {
-    "public": "../client/dist",
+    "public": "client-dist",
     "rewrites": [
       {
         "source": "/api/**",

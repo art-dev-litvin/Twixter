@@ -70,6 +70,7 @@ node_modules/
 
 # compiled output
 /dist
+/client-dist
 /build
 
 # OS
