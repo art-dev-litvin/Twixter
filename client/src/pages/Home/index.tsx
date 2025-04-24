@@ -12,10 +12,6 @@ import { handleResultWithToast } from "../../utils/handleResultWithToast";
 import SearchPosts from "../../components/SearchPosts";
 
 function Home() {
-  const [algoliaFoundPostIds, setAlgoliaFoundPostIds] = React.useState<
-    string[]
-  >([]);
-  const [withAlgoliaSearch, setWithAlgoliaSearch] = React.useState(false);
   const [posts, setPosts] = React.useState<TPost[]>([]);
   const [isLoading, setIsLoading] = React.useState(true);
   const [searchParams] = useSearchParams();
@@ -25,17 +21,12 @@ function Home() {
   >([null]);
   const [isEndReached, setIsEndReached] = React.useState(false);
   const { shouldUpdatePosts, setShouldUpdatePosts } = usePostsUpdates();
-  const filteredPosts = React.useMemo(
-    () =>
-      withAlgoliaSearch
-        ? posts.filter((post) => algoliaFoundPostIds.includes(post.id))
-        : posts,
-    [algoliaFoundPostIds, posts, withAlgoliaSearch]
-  );
 
   const fetchPosts = React.useCallback(
-    async (sortBy: PostsSortByType | null) => {
+    async (sortBy?: PostsSortByType | null) => {
       const cursor = pageCursorsHistory[currentPageIndex];
+
+      setIsLoading(true);
 
       const res = await getPosts({
         sortBy,
@@ -67,16 +58,10 @@ function Home() {
   );
 
   React.useEffect(() => {
-    console.log(algoliaFoundPostIds);
-  }, [algoliaFoundPostIds]);
-
-  React.useEffect(() => {
-    setIsLoading(true);
-
     const sortBy = searchParams.get("sortBy") as PostsSortByType | null;
 
     fetchPosts(sortBy);
-  }, [searchParams, fetchPosts]);
+  }, [searchParams]);
 
   React.useEffect(() => {
     if (shouldUpdatePosts) {
@@ -103,20 +88,17 @@ function Home() {
       <div className="mb-8 pb-4 border-b border-slate-200 flex justify-between items-center">
         <NewPost />
         <div className="flex gap-4 items-center">
-          <SearchPosts
-            setAlgoliaFoundPostIds={setAlgoliaFoundPostIds}
-            setWithAlgoliaSearch={setWithAlgoliaSearch}
-          />
+          <SearchPosts />
           <PostsSortBy />
           <span className="font-bold">Page {currentPageIndex + 1}</span>
         </div>
       </div>
       {isLoading && <h2 className="text-xl">Fetching posts...</h2>}
-      {!isLoading && filteredPosts.length === 0 && (
-        <h2 className="text-xl">No posts yet :/</h2>
+      {!isLoading && posts.length === 0 && (
+        <h2 className="text-xl">No posts yet ☁️</h2>
       )}
-      <PostsGrid posts={filteredPosts} />
-      {!isLoading && filteredPosts.length ? (
+      <PostsGrid posts={posts} />
+      {!isLoading && posts.length ? (
         <Pagination
           currentPageIndex={currentPageIndex}
           onNext={goToNextPage}

@@ -8,7 +8,7 @@ export const getPosts = async ({
   limit,
   cursor,
 }: {
-  sortBy: PostsSortByType | null;
+  sortBy?: PostsSortByType | null;
   limit: number;
   cursor: string | null;
 }): ApiResponse<TPost[]> => {

@@ -1,31 +1,25 @@
 import React from "react";
-import { useAlgoliaSearch } from "../../hooks/useAlgoliaSearch";
 import Input from "../Input";
 
-interface SearchPostsProps {
-  setAlgoliaFoundPostIds: React.Dispatch<React.SetStateAction<string[]>>;
-  setWithAlgoliaSearch: React.Dispatch<React.SetStateAction<boolean>>;
-}
-
-function SearchPosts({
-  setAlgoliaFoundPostIds,
-  setWithAlgoliaSearch,
-}: SearchPostsProps) {
+function SearchPosts() {
   const [query, setQuery] = React.useState("");
-  const { results, loading } = useAlgoliaSearch(query);
+
+  React.useEffect(() => {
+    const handler = setTimeout(() => {
+      if (query && query.trim()) {
+        console.log(query.trim());
+        console.log("Debounced query:", query);
+      }
+    }, 1000);
+
+    return () => {
+      clearTimeout(handler);
+    };
+  }, [query]);
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setQuery(e.target.value);
   };
-
-  React.useEffect(() => {
-    if (query) {
-      setWithAlgoliaSearch(true);
-    } else {
-      setWithAlgoliaSearch(false);
-    }
-    setAlgoliaFoundPostIds(results);
-  }, [results, setAlgoliaFoundPostIds]);
 
   return (
     <div>
@@ -34,8 +28,6 @@ function SearchPosts({
         value={query}
         onChange={handleSearchChange}
       />
-
-      {loading ? <p>Loading...</p> : null}
     </div>
   );
 }
