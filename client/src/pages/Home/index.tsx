@@ -21,9 +21,10 @@ function Home() {
   >([null]);
   const [isEndReached, setIsEndReached] = React.useState(false);
   const { shouldUpdatePosts, setShouldUpdatePosts } = usePostsUpdates();
+  const isFirstRender = React.useRef(true);
 
   const fetchPosts = React.useCallback(
-    async (sortBy?: PostsSortByType | null) => {
+    async (sortBy: PostsSortByType, query: string) => {
       const cursor = pageCursorsHistory[currentPageIndex];
 
       setIsLoading(true);
@@ -31,7 +32,8 @@ function Home() {
       const res = await getPosts({
         sortBy,
         limit: postsLimitPerPage,
-        cursor: cursor,
+        cursor,
+        query,
       });
 
       const posts = handleResultWithToast(res);
@@ -58,17 +60,23 @@ function Home() {
   );
 
   React.useEffect(() => {
-    const sortBy = searchParams.get("sortBy") as PostsSortByType | null;
+    const sortBy = searchParams.get("sortBy") as PostsSortByType;
+    const query = searchParams.get("query") as string;
 
-    fetchPosts(sortBy);
+    fetchPosts(sortBy, query);
+    setShouldUpdatePosts(false);
+    isFirstRender.current = false;
   }, [searchParams]);
 
   React.useEffect(() => {
-    if (shouldUpdatePosts) {
-      fetchPosts(null);
+    const sortBy = searchParams.get("sortBy") as PostsSortByType;
+    const query = searchParams.get("query") as string;
+
+    if (!isFirstRender.current && shouldUpdatePosts) {
+      fetchPosts(sortBy, query);
       setShouldUpdatePosts(false);
     }
-  }, [shouldUpdatePosts, fetchPosts, setShouldUpdatePosts]);
+  }, [shouldUpdatePosts]);
 
   const goToPrevPage = () => {
     if (currentPageIndex > 0) {

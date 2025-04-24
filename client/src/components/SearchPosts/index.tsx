@@ -1,15 +1,17 @@
 import React from "react";
 import Input from "../Input";
+import { useSearchParams } from "react-router-dom";
 
 function SearchPosts() {
   const [query, setQuery] = React.useState("");
+  const [searchParams, setSearchParams] = useSearchParams();
 
   React.useEffect(() => {
     const handler = setTimeout(() => {
-      if (query && query.trim()) {
-        console.log(query.trim());
-        console.log("Debounced query:", query);
-      }
+      setSearchParams({
+        ...Object.fromEntries(searchParams.entries()),
+        query,
+      });
     }, 1000);
 
     return () => {
