@@ -7,6 +7,7 @@ import PostsGrid from "../PostsGrid";
 import { User } from "firebase/auth";
 import { TPost } from "../../types/post";
 import { useAuth } from "../../contexts/auth/Auth.hook";
+import NewPost from "../NewPost";
 
 interface UserProfileLayoutProps {
   user: User;
@@ -15,6 +16,7 @@ interface UserProfileLayoutProps {
 
 function UserProfileLayout({ user, posts }: UserProfileLayoutProps) {
   const { user: currentUser } = useAuth();
+  const isOwner = currentUser && currentUser.uid === user.uid;
 
   return (
     <>
@@ -35,10 +37,10 @@ function UserProfileLayout({ user, posts }: UserProfileLayoutProps) {
           <span className="font-bold">Email:</span> {user.email}
         </p>
         <p className="text-xl">
-          <span className="font-bold">Created posts:</span> {0}
+          <span className="font-bold">Created posts:</span> {posts.length}
         </p>
       </div>
-      {currentUser && currentUser.uid === user.uid && (
+      {isOwner && (
         <div className="flex gap-4">
           <Button to={routes.editProfile} variant="gray">
             Edit profile
@@ -47,7 +49,21 @@ function UserProfileLayout({ user, posts }: UserProfileLayoutProps) {
         </div>
       )}
       <div className="mt-12 pt-12 border-t border-slate-200">
-        <PostsGrid posts={posts} />
+        {posts.length > 0 ? (
+          <PostsGrid posts={posts} />
+        ) : (
+          <div>
+            <h3 className="text-lg">You don't have posts yet.</h3>
+            {isOwner && (
+              <>
+                <h3 className="text-lg mb-3">
+                  Do you want to create a new one?
+                </h3>
+                <NewPost />
+              </>
+            )}
+          </div>
+        )}
       </div>
     </>
   );
