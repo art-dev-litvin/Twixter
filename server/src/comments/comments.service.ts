@@ -1,6 +1,7 @@
 import { HttpException, Injectable } from '@nestjs/common';
 import { CreateCommentDto } from './dto/create-comment.dto';
 import * as admin from 'firebase-admin';
+import { FieldValue } from 'firebase-admin/firestore';
 import { Comment } from './entities/comment.entity';
 import { UpdateCommentDto } from './dto/update-comment.dto';
 
@@ -8,7 +9,9 @@ import { UpdateCommentDto } from './dto/update-comment.dto';
 export class CommentsService {
   async create(
     createCommentDto: CreateCommentDto,
-  ): Promise<Comment | undefined> {
+  ): Promise<
+    { newComment: Comment; updatedCommentsCount: number } | undefined
+  > {
     const { type, text, postId, parentCommentId, user } = createCommentDto;
 
     const { displayName, photoURL, uid } = user;
@@ -35,7 +38,7 @@ export class CommentsService {
         .collection(type === 'comment' ? 'commentsIndex' : 'repliesIndex')
         .doc(targetRef.id);
 
-      const messageData: Comment = {
+      const commentData: Comment = {
         id: targetRef.id,
         text,
         userId: uid,
@@ -50,13 +53,24 @@ export class CommentsService {
           ? { commentPath: targetRef.path, uid }
           : { replyPath: targetRef.path, uid };
 
+      const postRef = firestore.collection('posts').doc(postId);
+
       // eslint-disable-next-line
       await firestore.runTransaction(async (t) => {
-        t.set(targetRef, messageData);
+        t.set(targetRef, commentData);
         t.set(indexRef, indexData);
+
+        if (type === 'comment') {
+          t.update(postRef, {
+            commentsCount: FieldValue.increment(1),
+          });
+        }
       });
 
-      return messageData;
+      const postSnap = await postRef.get();
+      const updatedCommentsCount = postSnap.data()?.commentsCount;
+
+      return { newComment: commentData, updatedCommentsCount };
     } catch (error) {
       if (error instanceof Error) {
         throw new HttpException(error.message, 400);
@@ -158,7 +172,10 @@ export class CommentsService {
     }
   }
 
-  async remove(postId: string, commentId: string): Promise<void> {
+  async remove(
+    postId: string,
+    commentId: string,
+  ): Promise<{ updatedCommentsCount: number } | undefined> {
     try {
       const firestore = admin.firestore();
 
@@ -168,7 +185,17 @@ export class CommentsService {
         .collection('comments')
         .doc(commentId);
 
+      const postRef = firestore.collection('posts').doc(postId);
+      await postRef.update({
+        commentsCount: FieldValue.increment(-1),
+      });
+
       await commentRef.delete();
+
+      const postSnap = await postRef.get();
+      const updatedCommentsCount = postSnap.data()?.commentsCount;
+
+      return { updatedCommentsCount };
     } catch (error) {
       if (error instanceof Error) {
         throw new HttpException(error.message, 400);

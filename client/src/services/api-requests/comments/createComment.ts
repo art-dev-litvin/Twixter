@@ -5,8 +5,8 @@ import { apiRequest } from "../../../utils/apiRequest";
 
 export const createComment = (
   createCommentDto: CreateCommentDto
-): ApiResponse<TComment> => {
-  return apiRequest<TComment>({
+): ApiResponse<{ newComment: TComment; updatedCommentsCount: number }> => {
+  return apiRequest({
     method: "POST",
     url: apiPaths.comments.new,
     data: createCommentDto,

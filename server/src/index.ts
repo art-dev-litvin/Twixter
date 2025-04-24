@@ -19,8 +19,6 @@ const createFunction = async (expressInstance): Promise<void> => {
 
   app.enableCors({
     origin: (origin, callback) => {
-      console.log(allowedOrigins);
-      console.warn(!origin || allowedOrigins.includes(origin));
       if (!origin || allowedOrigins.includes(origin)) {
         callback(null, true);
       } else {

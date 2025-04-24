@@ -15,9 +15,14 @@ import { updateComment } from "../../services/api-requests/comments/updateCommen
 interface CommentsProps {
   postId: string;
   isOpenedComments: boolean;
+  setPostCommentsCount: React.Dispatch<React.SetStateAction<number>>;
 }
 
-function Comments({ postId, isOpenedComments }: CommentsProps) {
+function Comments({
+  postId,
+  isOpenedComments,
+  setPostCommentsCount,
+}: CommentsProps) {
   const [commentInputValue, setCommentInputValue] = React.useState("");
   const [comments, setComments] = React.useState<TComment[]>([]);
   const [activeComment, setActiveComment] = React.useState<{
@@ -72,10 +77,11 @@ function Comments({ postId, isOpenedComments }: CommentsProps) {
 
       const res = await createComment(createCommentDto);
 
-      const createdComment = handleResultWithToast(res, true);
+      const data = handleResultWithToast(res, true);
 
-      if (createdComment) {
+      if (data) {
         setCommentInputValue("");
+        setPostCommentsCount(data.updatedCommentsCount);
 
         if (activeComment.type === "reply") {
           setMyReplies((prev) => {
@@ -88,7 +94,7 @@ function Comments({ postId, isOpenedComments }: CommentsProps) {
                 reply.parentCommentId === activeComment.comment!.id
                   ? {
                       ...reply,
-                      replies: [createdComment, ...reply.replies],
+                      replies: [data.newComment, ...reply.replies],
                     }
                   : reply
               );
@@ -97,14 +103,14 @@ function Comments({ postId, isOpenedComments }: CommentsProps) {
             return [
               {
                 parentCommentId: activeComment.comment!.id,
-                replies: [createdComment],
+                replies: [data.newComment],
               },
               ...prev,
             ];
           });
           setActiveComment({ comment: null, type: null });
         } else {
-          setComments((prev) => [createdComment, ...prev]);
+          setComments((prev) => [data.newComment, ...prev]);
         }
       }
     }
@@ -147,6 +153,7 @@ function Comments({ postId, isOpenedComments }: CommentsProps) {
         <div className="overflow-y-auto h-full flex flex-col gap-4">
           {comments.map((comment) => (
             <Comment
+              setPostCommentsCount={setPostCommentsCount}
               myReplies={myReplies}
               setActiveComment={setActiveComment}
               key={comment.id}

@@ -7,6 +7,7 @@ import { deleteComment } from "../../services/api-requests/comments/deleteCommen
 import { handleResultWithToast } from "../../utils/handleResultWithToast";
 import React from "react";
 import { getCommentsByPostId } from "../../services/api-requests/comments/getCommentsByPostId";
+import { auth } from "../../services/firebase";
 
 interface CommentProps {
   comment: TComment;
@@ -23,13 +24,29 @@ interface CommentProps {
     parentCommentId: string;
     replies: TComment[];
   }[];
+  setPostCommentsCount: React.Dispatch<React.SetStateAction<number>>;
 }
 
 function Comment(props: CommentProps) {
-  const { comment, postId, setComments, setActiveComment, isReply, myReplies } =
-    props;
-  const { id, text, createdAt, updatedAt, userDisplayName, userPhotoUrl } =
-    comment;
+  const {
+    comment,
+    postId,
+    setComments,
+    setActiveComment,
+    isReply,
+    myReplies,
+    setPostCommentsCount,
+  } = props;
+  const {
+    id,
+    text,
+    createdAt,
+    updatedAt,
+    userDisplayName,
+    userId,
+    userPhotoUrl,
+  } = comment;
+  const currentUserId = auth.currentUser?.uid;
   const [areAllRepliesShown, setAreAllRepliesShown] = React.useState(false);
   const [allReplies, setAllReplies] = React.useState<TComment[]>([]);
 
@@ -52,8 +69,11 @@ function Comment(props: CommentProps) {
   const onDeleteComment = async () => {
     const res = await deleteComment(postId, id);
 
-    if (handleResultWithToast(res)) {
+    const data = handleResultWithToast(res);
+
+    if (data) {
       setComments((prev) => prev.filter((com) => com.id !== id));
+      setPostCommentsCount(data.updatedCommentsCount);
     }
   };
 
@@ -124,7 +144,7 @@ function Comment(props: CommentProps) {
           )}
         </div>
       </div>
-      {!isReply && (
+      {!isReply && currentUserId === userId && (
         <div>
           <Dropdown>
             <Dropdown.Trigger>

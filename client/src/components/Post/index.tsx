@@ -28,11 +28,14 @@ function Post({ post, maxWidth }: PostProps) {
     userId,
     userDisplayName,
     userPhotoUrl,
+    commentsCount,
   } = post;
 
   const [isDropdownOpen, setIsDropdownOpen] = React.useState(false);
   const { setShouldUpdatePosts } = usePostsUpdates();
   const [isOpenComments, setIsOpenComments] = React.useState(false);
+  const [postCommentsCount, setPostCommentsCount] =
+    React.useState(commentsCount);
 
   const navigate = useNavigate();
   const currentUser = auth.currentUser;
@@ -51,7 +54,6 @@ function Post({ post, maxWidth }: PostProps) {
 
   const onRemovePost = async () => {
     changeDropdownOpen(false);
-    console.log("should update");
     setShouldUpdatePosts(true);
   };
 
@@ -106,13 +108,17 @@ function Post({ post, maxWidth }: PostProps) {
               isIconOnly
               variant="transparent">
               <MessageSquareIcon className="shrink-0 size-5" />
-              {0}
+              {postCommentsCount}
             </Button>
 
             <Popup
               open={isOpenComments}
               onClose={changeCommentsPopupOpen(false)}>
-              <Comments postId={id} isOpenedComments={isOpenComments} />
+              <Comments
+                setPostCommentsCount={setPostCommentsCount}
+                postId={id}
+                isOpenedComments={isOpenComments}
+              />
             </Popup>
           </div>
         </div>
