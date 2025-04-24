@@ -1,50 +1,65 @@
 import { useAuth } from "../../contexts/auth/Auth.hook";
-import { TPost } from "../../types/post";
-import React from "react";
-import { getPostsByUser } from "../../services/api-requests/posts/getPostsByUser";
 import UserProfileLayout from "../../components/UserProfileLayout";
-import { usePostsUpdates } from "../../contexts/postsUpdates/postsUpdates.hook";
+import { useLocation, useParams } from "react-router-dom";
+import { routes } from "../../constants/routes";
+import { User } from "firebase/auth";
+import React from "react";
+import { getUserById } from "../../services/api-requests/auth/getUserById";
 import { handleResultWithToast } from "../../utils/handleResultWithToast";
 
 function Profile() {
-  const { user } = useAuth();
-  const [userPosts, setUserPosts] = React.useState<TPost[]>([]);
-  const { shouldUpdatePosts, setShouldUpdatePosts } = usePostsUpdates();
+  const location = useLocation();
+  const userId = useParams().id;
+  const { user: currentUser, isUserLoading: isCurrentUserLoading } = useAuth();
+  const [user, setUser] = React.useState<User | null>(null);
+  const [isUserLoading, setIsUserLoading] = React.useState(true);
+  const isMyProfilePage = location.pathname === routes.profile;
 
-  const fetchUserPosts = React.useCallback(async () => {
-    if (user) {
-      const res = await getPostsByUser(user.uid);
+  React.useEffect(() => {
+    const fetchUser = async () => {
+      if (userId) {
+        const result = await getUserById(userId);
 
-      const posts = handleResultWithToast(res);
-      if (posts) {
-        setUserPosts(posts);
+        setIsUserLoading(false);
+
+        const user = handleResultWithToast(result);
+
+        if (user) {
+          setUser(user);
+        }
       }
+    };
+
+    if (!isMyProfilePage) {
+      fetchUser();
+    } else {
+      setIsUserLoading(false);
     }
-  }, [user]);
+  }, [userId, isMyProfilePage]);
 
-  React.useEffect(() => {
-    fetchUserPosts();
-  }, [user, fetchUserPosts]);
+  const isOwner = isMyProfilePage || currentUser?.uid === user?.uid;
 
-  React.useEffect(() => {
-    if (shouldUpdatePosts) {
-      fetchUserPosts();
-      setShouldUpdatePosts(false);
-    }
-  }, [shouldUpdatePosts, fetchUserPosts, setShouldUpdatePosts]);
+  if (isCurrentUserLoading || isUserLoading) {
+    return <h3 className="text-lg animate-pulse">Fetching user...</h3>;
+  }
 
-  if (!user) {
-    return (
-      <div>
-        <h1>Error, you need to login first!</h1>
-      </div>
-    );
+  if (isMyProfilePage && !currentUser) {
+    return <h3 className="text-lg">You are not authorized</h3>;
+  }
+
+  if (!isMyProfilePage && !user) {
+    return <h3 className="text-lg">User not found :(</h3>;
   }
 
   return (
     <div>
-      <h1 className="text-4xl text-center font-bold mb-6">Your profile</h1>
-      <UserProfileLayout posts={userPosts} user={user} />
+      <h1 className="text-4xl text-center font-bold mb-6">
+        {isOwner ? "Your profile" : `${user?.displayName} profile`}
+      </h1>
+      <UserProfileLayout
+        user={isMyProfilePage ? currentUser! : user!}
+        isOwner={isOwner}
+      />
     </div>
   );
 }

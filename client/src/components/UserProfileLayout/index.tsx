@@ -1,22 +1,50 @@
+import React from "react";
 import classNames from "classnames";
 import Avatar from "../Avatar";
-import RemoveAccount from "../RemoveAccount";
 import Button from "../Button";
-import { routes } from "../../constants/routes";
-import PostsGrid from "../PostsGrid";
-import { User } from "firebase/auth";
-import { TPost } from "../../types/post";
-import { useAuth } from "../../contexts/auth/Auth.hook";
 import NewPost from "../NewPost";
+import PostsGrid from "../PostsGrid";
+import RemoveAccount from "../RemoveAccount";
+import { User } from "firebase/auth";
+import { routes } from "../../constants/routes";
+import { TPost } from "../../types/post";
+import { getPostsByUser } from "../../services/api-requests/posts/getPostsByUser";
+import { handleResultWithToast } from "../../utils/handleResultWithToast";
+import { usePostsUpdates } from "../../contexts/postsUpdates/postsUpdates.hook";
 
 interface UserProfileLayoutProps {
   user: User;
-  posts: TPost[];
+  isOwner: boolean;
 }
 
-function UserProfileLayout({ user, posts }: UserProfileLayoutProps) {
-  const { user: currentUser } = useAuth();
-  const isOwner = currentUser && currentUser.uid === user.uid;
+function UserProfileLayout({ user, isOwner }: UserProfileLayoutProps) {
+  const { shouldUpdatePosts, setShouldUpdatePosts } = usePostsUpdates();
+  const [userPosts, setUserPosts] = React.useState<TPost[]>([]);
+  const [isLoadingPosts, setIsLoadingPosts] = React.useState(true);
+
+  const fetchUserPosts = React.useCallback(async () => {
+    if (user) {
+      setIsLoadingPosts(true);
+      const res = await getPostsByUser(user.uid);
+      setIsLoadingPosts(false);
+
+      const posts = handleResultWithToast(res);
+      if (posts) {
+        setUserPosts(posts);
+      }
+    }
+  }, [user]);
+
+  React.useEffect(() => {
+    fetchUserPosts();
+  }, [user, fetchUserPosts]);
+
+  React.useEffect(() => {
+    if (shouldUpdatePosts) {
+      fetchUserPosts();
+      setShouldUpdatePosts(false);
+    }
+  }, [shouldUpdatePosts, fetchUserPosts, setShouldUpdatePosts]);
 
   return (
     <>
@@ -37,7 +65,7 @@ function UserProfileLayout({ user, posts }: UserProfileLayoutProps) {
           <span className="font-bold">Email:</span> {user.email}
         </p>
         <p className="text-xl">
-          <span className="font-bold">Created posts:</span> {posts.length}
+          <span className="font-bold">Created posts:</span> {userPosts.length}
         </p>
       </div>
       {isOwner && (
@@ -49,11 +77,18 @@ function UserProfileLayout({ user, posts }: UserProfileLayoutProps) {
         </div>
       )}
       <div className="mt-12 pt-12 border-t border-slate-200">
-        {posts.length > 0 ? (
-          <PostsGrid posts={posts} />
-        ) : (
+        {isLoadingPosts && <h3 className="text-lg">Loading posts...</h3>}
+        {!isLoadingPosts && userPosts.length > 0 && (
+          <PostsGrid posts={userPosts} />
+        )}
+
+        {!isLoadingPosts && !userPosts.length && (
           <div>
-            <h3 className="text-lg">You don't have posts yet.</h3>
+            <h3 className="text-lg">
+              {isOwner
+                ? "You don't have posts yet 🦖"
+                : "There are no posts yet 🍵"}
+            </h3>
             {isOwner && (
               <>
                 <h3 className="text-lg mb-3">
