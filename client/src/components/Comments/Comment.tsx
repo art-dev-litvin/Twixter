@@ -8,6 +8,7 @@ import { handleResultWithToast } from "../../utils/handleResultWithToast";
 import React from "react";
 import { getCommentsByPostId } from "../../services/api-requests/comments/getCommentsByPostId";
 import { auth } from "../../services/firebase";
+import { TMyReplies } from ".";
 
 interface CommentProps {
   comment: TComment;
@@ -24,7 +25,9 @@ interface CommentProps {
     parentCommentId: string;
     replies: TComment[];
   }[];
+  setMyReplies: React.Dispatch<React.SetStateAction<TMyReplies>>;
   setPostCommentsCount: React.Dispatch<React.SetStateAction<number>>;
+  focusAddCommentInput: () => void;
 }
 
 function Comment(props: CommentProps) {
@@ -35,7 +38,9 @@ function Comment(props: CommentProps) {
     setActiveComment,
     isReply,
     myReplies,
+    setMyReplies,
     setPostCommentsCount,
+    focusAddCommentInput,
   } = props;
   const {
     id,
@@ -49,11 +54,17 @@ function Comment(props: CommentProps) {
   const currentUserId = auth.currentUser?.uid;
   const [areAllRepliesShown, setAreAllRepliesShown] = React.useState(false);
   const [allReplies, setAllReplies] = React.useState<TComment[]>([]);
+  const [isLoadingReplies, setIsLoadingReplies] = React.useState(false);
+  const [isMoreActionsOpen, setIsMoreActionsOpen] = React.useState(false);
+  const [isDeletingComment, setIsDeletingComment] = React.useState(false);
 
   const fetchReplies = React.useCallback(async () => {
     const res = await getCommentsByPostId(postId, "replies", id);
 
     const data = handleResultWithToast(res);
+
+    setMyReplies([]);
+    setIsLoadingReplies(false);
 
     if (data) {
       setAllReplies(data);
@@ -61,15 +72,20 @@ function Comment(props: CommentProps) {
   }, [id, postId]);
 
   React.useEffect(() => {
-    if (areAllRepliesShown && !allReplies.length) {
+    if (areAllRepliesShown) {
       fetchReplies();
     }
   }, [areAllRepliesShown, allReplies.length, fetchReplies]);
 
   const onDeleteComment = async () => {
+    setIsDeletingComment(true);
+    setActiveComment({ comment: null, type: null });
+
     const res = await deleteComment(postId, id);
 
     const data = handleResultWithToast(res);
+
+    setIsDeletingComment(false);
 
     if (data) {
       setComments((prev) => prev.filter((com) => com.id !== id));
@@ -77,8 +93,14 @@ function Comment(props: CommentProps) {
     }
   };
 
+  const handleMoreActionsOpen = (open: boolean) => {
+    setIsMoreActionsOpen(open);
+  };
+
   const onClickEdit = () => {
     setActiveComment({ comment, type: "edit" });
+    handleMoreActionsOpen(false);
+    focusAddCommentInput();
   };
 
   const onClickReply = () => {
@@ -86,6 +108,14 @@ function Comment(props: CommentProps) {
   };
 
   const onToggleShowReplies = () => {
+    if (!areAllRepliesShown && !allReplies.length) {
+      setIsLoadingReplies(true);
+    }
+
+    if (!areAllRepliesShown && allReplies.length) {
+      setMyReplies([]);
+    }
+
     setAreAllRepliesShown((prev) => !prev);
   };
 
@@ -114,17 +144,24 @@ function Comment(props: CommentProps) {
               </button>
             )}
           </div>
-          {!isReply &&
-            myRepliesByCommentId?.replies?.map((reply) => (
-              <Comment
-                key={`${postId}-${myRepliesByCommentId.parentCommentId}-${reply.id}`}
-                {...props}
-                isReply
-                comment={reply}
-              />
-            ))}
+
           {!isReply && (
             <>
+              {areAllRepliesShown && isLoadingReplies && (
+                <p className="text-sm animate-pulse">Loading replies...</p>
+              )}
+              {areAllRepliesShown &&
+                !isLoadingReplies &&
+                !allReplies.length &&
+                !myReplies.length && <p className="text-sm">No replies yet</p>}
+              {myRepliesByCommentId?.replies?.map((reply) => (
+                <Comment
+                  key={`${postId}-${myRepliesByCommentId.parentCommentId}-${reply.id}`}
+                  {...props}
+                  isReply
+                  comment={reply}
+                />
+              ))}
               {areAllRepliesShown &&
                 allReplies.map((reply) => (
                   <Comment
@@ -146,7 +183,9 @@ function Comment(props: CommentProps) {
       </div>
       {!isReply && currentUserId === userId && (
         <div>
-          <Dropdown>
+          <Dropdown
+            changeOpen={(open) => handleMoreActionsOpen(open)}
+            open={isMoreActionsOpen}>
             <Dropdown.Trigger>
               <Button
                 isIconOnly
@@ -157,7 +196,11 @@ function Comment(props: CommentProps) {
             </Dropdown.Trigger>
             <Dropdown.Menu>
               <Dropdown.Item onClick={onClickEdit}>Edit</Dropdown.Item>
-              <Dropdown.Item onClick={onDeleteComment}>Delete</Dropdown.Item>
+              <Dropdown.Item
+                disabled={isDeletingComment}
+                onClick={onDeleteComment}>
+                {isDeletingComment ? "Deleting..." : "Delete"}
+              </Dropdown.Item>
             </Dropdown.Menu>
           </Dropdown>
         </div>

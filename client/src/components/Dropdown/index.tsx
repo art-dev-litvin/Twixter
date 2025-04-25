@@ -72,7 +72,7 @@ function Menu({ children }: { children: ReactNode }) {
           className="size-full fixed top-0 left-0 z-30"
         />
         <div className="absolute z-40 right-0 mt-2 w-56 origin-top-right rounded-md bg-white shadow-lg ring-2 ring-slate-300 focus:outline-none">
-          <div className="py-1">{children}</div>
+          <div className="py-1 flex flex-col items-start">{children}</div>
         </div>
       </>
     )
@@ -82,16 +82,19 @@ function Menu({ children }: { children: ReactNode }) {
 function Item({
   children,
   onClick,
+  disabled,
 }: {
   children: ReactNode;
   onClick?: () => void;
+  disabled?: boolean;
 }) {
   return (
-    <div
+    <button
+      disabled={disabled}
       onClick={onClick}
-      className="px-4 py-2 hover:bg-gray-100 cursor-pointer transition-colors">
+      className="px-4 py-2 text-left w-full not-disabled:hover:bg-gray-100 not-disabled:cursor-pointer disabled:cursor-not-allowed disabled:bg-gray-100 transition-colors ">
       {children}
-    </div>
+    </button>
   );
 }
 

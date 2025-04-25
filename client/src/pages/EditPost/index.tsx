@@ -8,11 +8,14 @@ import Card from "../../components/Card";
 import { TPost } from "../../types/post";
 import { getPost } from "../../services/api-requests/posts/getPost";
 import { handleResultWithToast } from "../../utils/handleResultWithToast";
+import { useNavigate } from "react-router-dom";
+import { routes } from "../../constants/routes";
 
 function EditPost() {
   const params = useParams();
   const [post, setPost] = React.useState<TPost | null>(null);
   const [loading, setLoading] = React.useState(true);
+  const navigate = useNavigate();
 
   React.useEffect(() => {
     const fetchPost = async () => {
@@ -32,6 +35,7 @@ function EditPost() {
 
     fetchPost();
   }, [params]);
+
   const handleSubmit = async (values: PostFormFields) => {
     console.log("old image", post?.imageUrl);
     console.log({
@@ -45,6 +49,7 @@ function EditPost() {
 
     if (handleResultWithToast(res)) {
       toast.success("Post updated!");
+      navigate(routes.home);
     }
   };
 
