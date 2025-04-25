@@ -23,12 +23,19 @@ export class PostsController {
 
   @Get()
   async getPosts(
-    @Query('cursor') cursor: string | null,
     @Query('limit', ParseIntPipe) limit = 10,
     @Query('sortBy') sortBy: 'likesCount' | 'commentsCount' = 'likesCount',
-    @Query('search') search?: string,
+    @Query('query') searchQuery: string,
+    @Query('cursor') cursor?: string,
+    @Query('page') page?: number,
   ) {
-    return this.postsService.getPosts({ cursor, limit, sortBy, search });
+    return this.postsService.getPosts({
+      cursor,
+      limit,
+      sortBy,
+      searchQuery,
+      page,
+    });
   }
 
   @Get(':id')

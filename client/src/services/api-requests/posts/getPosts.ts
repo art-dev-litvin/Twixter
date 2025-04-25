@@ -8,15 +8,17 @@ export const getPosts = async ({
   limit,
   cursor,
   query,
+  page,
 }: {
   sortBy: PostsSortByType;
   limit: number;
   cursor: string | null;
   query: string;
+  page: number;
 }): ApiResponse<TPost[]> => {
   return apiRequest<TPost[]>({
     method: "GET",
     url: apiPaths.posts.getAll,
-    params: { limit, sortBy, cursor, query },
+    params: { limit, sortBy, cursor, query, page },
   });
 };

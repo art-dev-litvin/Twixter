@@ -4,9 +4,13 @@ import { parseBase64Image } from 'src/utils/parseBase64Image';
 import { uploadBase64ToFirebaseStorage } from 'src/utils/uploadBase64ToFirebaseStorage';
 import { TPost } from 'src/types/post';
 import { UpdatePostDto } from './dtos/update-post.dto';
+import { AlgoliaService } from 'src/algolia/algolia.service';
+import { FieldPath } from 'firebase-admin/firestore';
 
 @Injectable()
 export class PostsService {
+  constructor(private algoliaService: AlgoliaService) {}
+
   async createPost({
     title,
     content,
@@ -64,46 +68,77 @@ export class PostsService {
 
   async getPosts({
     cursor,
+    page,
     limit,
-    search,
+    searchQuery,
     sortBy = 'commentsCount',
   }: {
-    cursor: string | null;
+    cursor?: string;
+    page?: number;
     limit: number;
-    search?: string;
+    searchQuery: string;
     sortBy?: 'commentsCount' | 'likesCount';
   }) {
     const postsCollection = admin.firestore().collection('posts');
 
-    let query: FirebaseFirestore.Query = postsCollection;
+    let ids: string[] = [];
 
-    if (search) {
-      query = query
-        .where('content', '>=', search)
-        .where('content', '<=', search + '\uf8ff');
+    if (searchQuery) {
+      ids = await this.algoliaService.searchPosts(searchQuery, page, limit);
+      console.log(ids);
     }
 
-    query = query.orderBy(sortBy, 'desc');
+    const query: FirebaseFirestore.Query = postsCollection;
+
+    if (ids.length) {
+      const batches: FirebaseFirestore.DocumentData[] = [];
+
+      // Firebase allows max 10 element with "in"
+      for (let i = 0; i < ids.length; i += 10) {
+        const chunk = ids.slice(i, i + 10);
+        const q = query.where(FieldPath.documentId(), 'in', chunk);
+        const snapshot = await q.get();
+        batches.push(...snapshot.docs);
+      }
+
+      const posts = batches.map((doc) => {
+        const data = doc.data();
+        const createdAt = data.createdAt.toDate();
+        return { ...data, createdAt, id: doc.id };
+      });
+
+      const sorted = ids
+        .map((id) => posts.find((p) => p.id === id))
+        .filter(Boolean);
+
+      return sorted.sort((a, b) => (b?.[sortBy] || 0) - (a?.[sortBy] || 0));
+    }
+
+    if (searchQuery && ids.length === 0) {
+      return [];
+    }
+
+    let firebaseQuery: FirebaseFirestore.Query = postsCollection.orderBy(
+      sortBy,
+      'desc',
+    );
 
     if (cursor) {
       const lastDocSnapshot = await postsCollection.doc(cursor).get();
       if (lastDocSnapshot.exists) {
-        query = query.startAfter(lastDocSnapshot);
+        firebaseQuery = firebaseQuery.startAfter(lastDocSnapshot);
       }
     }
 
-    query = query.limit(limit);
+    firebaseQuery = firebaseQuery.limit(limit);
 
-    const snapshot = await query.get();
+    const snapshot = await firebaseQuery.get();
 
-    const posts = snapshot.docs.map((doc) => {
+    return snapshot.docs.map((doc) => {
       const data = doc.data();
       const createdAt = data.createdAt.toDate();
-
-      return { ...data, createdAt };
+      return { ...data, createdAt, id: doc.id };
     });
-
-    return posts;
   }
 
   async getPostsByUser(userId: string) {
@@ -164,8 +199,7 @@ export class PostsService {
         const imagePath = oldImageUrl
           ? oldImageUrl
           : `posts/${postId}/image/${Date.now()}`;
-        console.log('path', imagePath);
-        console.log(oldImageUrl);
+
         const { mimeType, base64Data } = parseBase64Image(imageBase64);
 
         imageUrl = await uploadBase64ToFirebaseStorage(
@@ -183,8 +217,9 @@ export class PostsService {
         updatedAt,
       });
 
-      const updatedPost = await postRef.get();
-      return { post: updatedPost.data() };
+      const updatedPost = (await postRef.get()).data();
+
+      return { post: updatedPost };
     } catch (error) {
       throw new HttpException(`Failed to update post: ${error.message}`, 400);
     }

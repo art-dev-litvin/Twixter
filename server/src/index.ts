@@ -10,6 +10,9 @@ const createFunction = async (expressInstance): Promise<void> => {
   const app = await NestFactory.create(
     AppModule,
     new ExpressAdapter(expressInstance),
+    {
+      logger: ['error', 'warn'],
+    },
   );
 
   const allowedOrigins = [
