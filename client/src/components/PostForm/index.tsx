@@ -1,9 +1,11 @@
 import React from "react";
 import { useFormik } from "formik";
-import { fileToBase64 } from "../../utils/fileToBase64";
 import { postFormSchema, PostFormFields } from "./schema";
 import FormField from "../FormField";
 import Button from "../Button";
+import { uploadImageFileToFirebase } from "../../utils/uploadImageFileToFirebase";
+import { handleResultWithToast } from "../../utils/handleResultWithToast";
+import { removeImageFileFromFirebase } from "../../utils/removeImageFileFromFirebase";
 
 interface PostFormProps {
   operation: "update" | "create";
@@ -26,7 +28,7 @@ function PostForm({
     initialValues: {
       title: defaultFieldValues?.title || "",
       content: defaultFieldValues?.content || "",
-      imageBase64: "",
+      imageUrl: localStorage.getItem("newPostImageUrl") || undefined,
     },
     validationSchema: postFormSchema,
     onSubmit: async (values) => {
@@ -36,6 +38,8 @@ function PostForm({
 
       if (operation === "create") {
         formik.resetForm();
+        localStorage.removeItem("newPostImageUrl");
+        localStorage.removeItem("newPostImagePath");
       }
 
       const imageFileInput = imageFileInputRef.current;
@@ -49,11 +53,25 @@ function PostForm({
 
   const onChangeImage = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.currentTarget.files?.[0];
+    const path = `posts/images/${crypto.randomUUID()}`;
 
     if (file) {
-      const imageBase64 = await fileToBase64(file);
+      const oldNewPostImagePath = localStorage.getItem("newPostImagePath");
 
-      formik.setFieldValue("imageBase64", imageBase64);
+      if (oldNewPostImagePath) {
+        await removeImageFileFromFirebase(oldNewPostImagePath);
+      }
+
+      const result = await uploadImageFileToFirebase({ file, path });
+
+      const uploadedImageUrl = handleResultWithToast(result);
+
+      if (uploadedImageUrl) {
+        localStorage.setItem("newPostImageUrl", uploadedImageUrl);
+        localStorage.setItem("newPostImagePath", path);
+
+        formik.setFieldValue("imageUrl", uploadedImageUrl);
+      }
     }
   };
 
@@ -106,8 +124,12 @@ function PostForm({
           onChange={onChangeImage}
           accept="image/*"
         />
-        {formik.touched.imageBase64 && formik.errors.imageBase64 && (
-          <FormField.Error>{formik.errors.imageBase64}</FormField.Error>
+        {formik.values.imageUrl && (
+          <img
+            className="mt-4 w-full h-52 object-cover rounded-md"
+            src={formik.values.imageUrl}
+            alt="image for new post"
+          />
         )}
       </FormField>
       <div className="mt-4">
