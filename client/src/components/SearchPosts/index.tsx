@@ -7,6 +7,11 @@ function SearchPosts() {
   const [searchParams, setSearchParams] = useSearchParams();
 
   React.useEffect(() => {
+    const newQuery = searchParams.get("query") || "";
+    setQuery(newQuery);
+  }, [searchParams]);
+
+  React.useEffect(() => {
     const handler = setTimeout(() => {
       setSearchParams({
         ...Object.fromEntries(searchParams.entries()),
