@@ -26,11 +26,8 @@ function RemoveAccount() {
 
     setIsLoading(false);
 
-    console.log("before toast if", res);
     if (handleResultWithToast(res) !== undefined) {
-      console.log("before toast");
       toast.success("Account has been removed!");
-      console.log("after toast");
       navigate(routes.home);
     }
   };

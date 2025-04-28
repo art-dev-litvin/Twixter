@@ -114,7 +114,6 @@ export class PostsService {
 
       sortedPosts.sort((a, b) => (b?.[sortBy] || 0) - (a?.[sortBy] || 0));
 
-      console.log('last', algoliaResult.totalPosts);
       return { posts: sortedPosts, totalPosts: algoliaResult.totalPosts };
     }
 

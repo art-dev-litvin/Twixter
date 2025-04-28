@@ -31,8 +31,6 @@ export function useFetchPosts(
       if (data) {
         const { posts, totalPosts } = data;
 
-        console.log(totalPosts);
-
         setPosts(posts);
         setIsEndReached(totalPosts <= postsLimitPerPage);
 

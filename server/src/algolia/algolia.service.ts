@@ -29,8 +29,6 @@ export class AlgoliaService {
       searchParams: { query, hitsPerPage, page },
     });
 
-    console.log(res.nbHits);
-
     const ids = res.hits.map((hit) => hit.objectID);
 
     return { ids, totalItems: res.nbHits };

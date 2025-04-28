@@ -34,7 +34,7 @@ export const deleteTemporaryImages = async () => {
   });
 
   if (!snapshot.docs.length) {
-    console.log('no images to delete :)');
+    console.log('No images to delete!');
   }
 
   await Promise.all(deletions);
