@@ -1,9 +1,8 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { FirebaseService } from 'src/firebase/firebase.service';
 import { FirebaseAuthError, UserRecord } from 'firebase-admin/auth';
-import { uploadBase64ToFirebaseStorage } from 'src/utils/uploadBase64ToFirebaseStorage';
-import { parseBase64Image } from 'src/utils/parseBase64Image';
 import * as admin from 'firebase-admin';
+import { UpdateProfileDto } from './dtos/updateProfile.dto';
 
 @Injectable()
 export class AuthService {
@@ -38,40 +37,27 @@ export class AuthService {
     }
   }
 
-  async updateProfile(
-    uid: string,
-    username?: string,
-    newPassword?: string,
-    profileImageBase64?: string,
-  ): Promise<UserRecord | undefined> {
+  async updateProfile({
+    newPassword,
+    userId,
+    updatedImageUrl,
+    username,
+  }: UpdateProfileDto): Promise<UserRecord | undefined> {
     const auth = this.firebaseService.getAuth();
-    let photoURL: string | undefined = undefined;
 
     try {
-      if (profileImageBase64) {
-        const imagePath = `users/${uid}/profile-${Date.now()}`;
-
-        const { mimeType, base64Data } = parseBase64Image(profileImageBase64);
-
-        photoURL = await uploadBase64ToFirebaseStorage(
-          base64Data,
-          imagePath,
-          mimeType,
-        );
-      }
-
-      const userRecord = await auth.updateUser(uid, {
+      const userRecord = await auth.updateUser(userId, {
         displayName: username,
         password: newPassword,
-        photoURL,
+        photoURL: updatedImageUrl,
       });
 
-      if (username || photoURL) {
+      if (username || updatedImageUrl) {
         const firestore = admin.firestore();
 
         // update posts
         const postsRef = firestore.collection('posts');
-        const userPostsQuery = postsRef.where('userId', '==', uid);
+        const userPostsQuery = postsRef.where('userId', '==', userId);
 
         const userPostsSnapshot = await userPostsQuery.get();
         const batch = firestore.batch();
@@ -79,7 +65,7 @@ export class AuthService {
         userPostsSnapshot.forEach((doc) => {
           batch.update(doc.ref, {
             userDisplayName: username || userRecord.displayName,
-            userPhotoUrl: photoURL || userRecord.photoURL,
+            userPhotoUrl: updatedImageUrl || userRecord.photoURL,
           });
         });
 
@@ -93,7 +79,7 @@ export class AuthService {
         ];
 
         for (const { ref, pathField } of collectionsToUpdate) {
-          const userQuery = ref.where('userId', '==', uid);
+          const userQuery = ref.where('userId', '==', userId);
           const userSnapshot = await userQuery.get();
 
           userSnapshot.forEach((doc) => {
@@ -102,7 +88,7 @@ export class AuthService {
 
             batch.update(docRef, {
               userDisplayName: username || userRecord.displayName,
-              userPhotoUrl: photoURL || userRecord.photoURL,
+              userPhotoUrl: updatedImageUrl || userRecord.photoURL,
             });
           });
         }

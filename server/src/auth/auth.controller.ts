@@ -16,14 +16,7 @@ export class AuthController {
 
   @Post('/update-profile')
   async updateUser(@Body() body: UpdateProfileDto) {
-    const { username, newPassword, profileImageBase64, uid } = body;
-
-    return this.authService.updateProfile(
-      uid,
-      username,
-      newPassword,
-      profileImageBase64,
-    );
+    return this.authService.updateProfile(body);
   }
 
   @Get('/user/:id')

@@ -15,8 +15,8 @@ export const getPosts = async ({
   cursor: string | null;
   query: string;
   page: number;
-}): ApiResponse<TPost[]> => {
-  return apiRequest<TPost[]>({
+}): ApiResponse<{ posts: TPost[]; totalPosts: number }> => {
+  return apiRequest({
     method: "GET",
     url: apiPaths.posts.getAll,
     params: { limit, sortBy, cursor, query, page },

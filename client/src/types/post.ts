@@ -15,17 +15,11 @@ export interface TPost {
 export interface CreatePostDto {
   title: string;
   content: string;
-  imageBase64?: string;
+  imageUrl?: string;
+  imageId?: string;
   userDisplayName: string;
   userId: string;
   userPhotoUrl?: string;
-}
-
-export interface UpdatePostDto {
-  title: string;
-  content: string;
-  imageBase64?: string;
-  oldImageUrl?: string;
 }
 
 export type PostsSortByType = "likesCount" | "commentsCount";

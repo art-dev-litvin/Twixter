@@ -19,20 +19,12 @@ function PostForm({
   const imageFileInputRef = React.useRef<HTMLInputElement>(null);
   const [isLoadingImage, setIsLoadingImage] = React.useState(false);
 
-  React.useEffect(() => {
-    return () => {
-      console.log("remove items");
-      localStorage.removeItem("newPostImageUrl");
-      localStorage.removeItem("newPostImagePath");
-    };
-  }, []);
-
   const formik = useFormik<PostFormFields>({
     initialValues: {
       title: defaultFieldValues?.title || "",
       content: defaultFieldValues?.content || "",
-      imageUrl: defaultFieldValues?.imageUrl || undefined,
-      imageId: defaultFieldValues?.imageId || undefined,
+      imageUrl: defaultFieldValues?.imageUrl,
+      imageId: undefined,
     },
     validationSchema: postFormSchema,
     onSubmit: async (values) => {
@@ -45,8 +37,6 @@ function PostForm({
       if (res) {
         if (operation === "create") {
           formik.resetForm();
-          localStorage.removeItem("newPostImageUrl");
-          localStorage.removeItem("newPostImagePath");
         }
 
         const imageFileInput = imageFileInputRef.current;

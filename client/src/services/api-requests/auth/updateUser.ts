@@ -7,11 +7,11 @@ const updateUser = async ({
   username,
   newPassword,
   userId,
-  userImageUrl,
+  updatedImageUrl,
 }: {
   username?: string;
   newPassword?: string;
-  userImageUrl?: string;
+  updatedImageUrl?: string;
   userId: string;
 }): ApiResponse<User> => {
   return apiRequest<User>({
@@ -19,7 +19,7 @@ const updateUser = async ({
     url: apiPaths.auth.updateProfile,
     data: {
       username,
-      userImageUrl,
+      updatedImageUrl,
       newPassword,
       userId,
     },

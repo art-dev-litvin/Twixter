@@ -44,10 +44,7 @@ export class PostsController {
   }
 
   @Patch(':id')
-  async updatePost(
-    @Param('id') id: string,
-    @Body() updateData: Partial<UpdatePostDto>,
-  ) {
+  async updatePost(@Param('id') id: string, @Body() updateData: UpdatePostDto) {
     return this.postsService.updatePost(id, updateData);
   }
 

@@ -1,7 +1,5 @@
 import * as admin from 'firebase-admin';
 import { HttpException, Injectable } from '@nestjs/common';
-import { parseBase64Image } from 'src/utils/parseBase64Image';
-import { uploadBase64ToFirebaseStorage } from 'src/utils/uploadBase64ToFirebaseStorage';
 import { TPost } from 'src/types/post';
 import { UpdatePostDto } from './dtos/update-post.dto';
 import { AlgoliaService } from 'src/algolia/algolia.service';
@@ -46,8 +44,6 @@ export class PostsService {
           .collection('posts-images')
           .doc(imageId);
 
-        console.log(uploadedImageRef);
-
         await uploadedImageRef.update({
           temporary: false,
           usedInPostId: postId,
@@ -72,23 +68,35 @@ export class PostsService {
     limit: number;
     searchQuery: string;
     sortBy?: 'commentsCount' | 'likesCount';
-  }) {
+  }): Promise<{ posts: TPost[]; totalPosts: number }> {
     const postsCollection = admin.firestore().collection('posts');
 
-    let ids: string[] = [];
+    let algoliaResult: { ids: string[]; totalPosts: number } = {
+      ids: [],
+      totalPosts: 0,
+    };
 
     if (searchQuery) {
-      ids = await this.algoliaService.searchPosts(searchQuery, page, limit);
+      const { ids, totalItems = 0 } = await this.algoliaService.searchPosts(
+        searchQuery,
+        page,
+        limit,
+      );
+
+      algoliaResult = {
+        ids,
+        totalPosts: Number(page) === 0 ? totalItems : ids.length,
+      };
     }
 
     const query: FirebaseFirestore.Query = postsCollection;
 
-    if (ids.length) {
+    if (algoliaResult.ids.length) {
       const batches: FirebaseFirestore.DocumentData[] = [];
 
       // Firebase allows max 10 element with "in"
-      for (let i = 0; i < ids.length; i += 10) {
-        const chunk = ids.slice(i, i + 10);
+      for (let i = 0; i < algoliaResult.ids.length; i += 10) {
+        const chunk = algoliaResult.ids.slice(i, i + 10);
         const q = query.where(FieldPath.documentId(), 'in', chunk);
         const snapshot = await q.get();
         batches.push(...snapshot.docs);
@@ -100,15 +108,18 @@ export class PostsService {
         return { ...data, createdAt, id: doc.id };
       });
 
-      const sorted = ids
+      const sortedPosts = algoliaResult.ids
         .map((id) => posts.find((p) => p.id === id))
         .filter(Boolean);
 
-      return sorted.sort((a, b) => (b?.[sortBy] || 0) - (a?.[sortBy] || 0));
+      sortedPosts.sort((a, b) => (b?.[sortBy] || 0) - (a?.[sortBy] || 0));
+
+      console.log('last', algoliaResult.totalPosts);
+      return { posts: sortedPosts, totalPosts: algoliaResult.totalPosts };
     }
 
-    if (searchQuery && ids.length === 0) {
-      return [];
+    if (searchQuery && algoliaResult.ids.length === 0) {
+      return { posts: [], totalPosts: 0 };
     }
 
     let firebaseQuery: FirebaseFirestore.Query = postsCollection.orderBy(
@@ -123,15 +134,19 @@ export class PostsService {
       }
     }
 
+    const totalPosts = (await firebaseQuery.count().get()).data().count;
+
     firebaseQuery = firebaseQuery.limit(limit);
 
     const snapshot = await firebaseQuery.get();
 
-    return snapshot.docs.map((doc) => {
+    const slicedPosts = snapshot.docs.map((doc) => {
       const data = doc.data();
       const createdAt = data.createdAt.toDate();
-      return { ...data, createdAt, id: doc.id };
+      return { ...data, createdAt, id: doc.id } as TPost;
     });
+
+    return { posts: slicedPosts, totalPosts: totalPosts };
   }
 
   async getPostsByUser(userId: string) {
@@ -178,43 +193,40 @@ export class PostsService {
     }
   }
 
-  async updatePost(postId: string, updateData: Partial<UpdatePostDto>) {
+  async updatePost(postId: string, updateData: UpdatePostDto) {
     try {
-      const { title, content, imageBase64, oldImageUrl } = updateData;
+      const { title, content, imageUrl, imageId } = updateData;
       const postRef = admin.firestore().collection('posts').doc(postId);
       const postDoc = await postRef.get();
-
-      let imageUrl: string | undefined;
 
       if (!postDoc.exists) {
         throw new HttpException('Post not found', 404);
       }
 
-      if (imageBase64) {
-        const imagePath = oldImageUrl
-          ? oldImageUrl
-          : `posts/${postId}/image/${Date.now()}`;
-
-        const { mimeType, base64Data } = parseBase64Image(imageBase64);
-
-        imageUrl = await uploadBase64ToFirebaseStorage(
-          base64Data,
-          imagePath,
-          mimeType,
-        );
-      }
-
-      const updatedAt = new Date();
       await postRef.update({
         title,
         content,
-        ...((imageUrl || oldImageUrl) && { imageUrl: imageUrl || oldImageUrl }),
-        updatedAt,
+        updatedAt: new Date(),
+        ...(imageUrl && {
+          imageUrl: imageUrl,
+        }),
       });
 
-      const updatedPost = (await postRef.get()).data();
+      if (imageId) {
+        const uploadedImageRef = admin
+          .firestore()
+          .collection('posts-images')
+          .doc(imageId);
 
-      return { post: updatedPost };
+        await uploadedImageRef.update({
+          temporary: false,
+          usedInPostId: postId,
+        });
+      }
+
+      const updatedPost = await postRef.get();
+
+      return { post: updatedPost.data() };
     } catch (error) {
       throw new HttpException(`Failed to update post: ${error.message}`, 400);
     }

@@ -38,9 +38,11 @@ function NewPost() {
           Create new post
         </h3>
         <PostForm
-          defaultFieldValues={{
-            imageUrl: localStorage.getItem("newPostImageUrl") || undefined,
-          }}
+          defaultFieldValues={
+            {
+              //updatedImageUrl: localStorage.getItem("newPostImageUrl") || undefined,
+            }
+          }
           operation="create"
           handleSubmit={handleSubmit}
         />

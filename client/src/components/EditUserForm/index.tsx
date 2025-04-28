@@ -80,7 +80,7 @@ function EditUserForm() {
 
       if (updatedUserImageData) {
         const result = await updateUser({
-          userImageUrl: updatedUserImageData.imageUrl,
+          updatedImageUrl: updatedUserImageData.imageUrl,
           userId: user.uid,
         });
 

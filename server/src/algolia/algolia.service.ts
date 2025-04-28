@@ -28,7 +28,12 @@ export class AlgoliaService {
       indexName: this.indexName,
       searchParams: { query, hitsPerPage, page },
     });
-    return res.hits.map((hit) => hit.objectID);
+
+    console.log(res.nbHits);
+
+    const ids = res.hits.map((hit) => hit.objectID);
+
+    return { ids, totalItems: res.nbHits };
   };
 
   //savePosts = (posts: TPost[]) => {

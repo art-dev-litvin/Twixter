@@ -2,7 +2,7 @@ import { IsOptional, IsString } from 'class-validator';
 
 export class UpdateProfileDto {
   @IsString()
-  uid: string;
+  userId: string;
 
   @IsString()
   @IsOptional()
@@ -14,5 +14,5 @@ export class UpdateProfileDto {
 
   @IsString()
   @IsOptional()
-  profileImageBase64?: string;
+  updatedImageUrl?: string;
 }

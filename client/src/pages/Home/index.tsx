@@ -54,17 +54,15 @@ function Home() {
         <h2 className="text-xl">No posts found, try to edit search ☁️</h2>
       )}
       <PostsGrid posts={posts} />
-      {!isLoading && posts.length ? (
-        <Pagination
-          currentPageIndex={currentPageIndex}
-          onNext={() =>
-            goToNextPage(() => fetchPosts(sortBy, query), isEndReached)
-          }
-          onPrev={() => goToPrevPage(() => fetchPosts(sortBy, query))}
-          isPrevDisabled={isLoading || currentPageIndex === 0}
-          isNextDisabled={isLoading || isEndReached}
-        />
-      ) : null}
+      <Pagination
+        currentPageIndex={currentPageIndex}
+        onNext={() =>
+          goToNextPage(() => fetchPosts(sortBy, query), isEndReached)
+        }
+        onPrev={() => goToPrevPage(() => fetchPosts(sortBy, query))}
+        isPrevDisabled={isLoading || currentPageIndex === 0}
+        isNextDisabled={isLoading || isEndReached}
+      />
     </div>
   );
 }

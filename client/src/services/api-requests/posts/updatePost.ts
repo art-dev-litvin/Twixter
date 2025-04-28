@@ -1,11 +1,12 @@
 import { apiPaths } from "../../../constants/api-paths";
-import { UpdatePostDto, TPost } from "../../../types/post";
+import { TPost } from "../../../types/post";
 import { ApiResponse } from "../../../types/api";
 import { apiRequest } from "../../../utils/apiRequest";
+import { PostFormFields } from "../../../components/PostForm/schema";
 
 const updatePost = async (
   postId: string,
-  values: UpdatePostDto
+  values: PostFormFields
 ): ApiResponse<TPost> => {
   return apiRequest<TPost>({
     method: "PATCH",

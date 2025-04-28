@@ -26,12 +26,15 @@ export function useFetchPosts(
         query,
       });
 
-      const posts = handleResultWithToast(res);
+      const data = handleResultWithToast(res);
 
-      if (posts) {
+      if (data) {
+        const { posts, totalPosts } = data;
+
+        console.log(totalPosts);
+
         setPosts(posts);
-        window.scrollTo({ top: 0 });
-        setIsEndReached(posts.length < postsLimitPerPage);
+        setIsEndReached(totalPosts <= postsLimitPerPage);
 
         const nextCursor = posts[posts.length - 1]?.id;
 
@@ -47,6 +50,7 @@ export function useFetchPosts(
       }
 
       setIsLoading(false);
+      window.scrollTo({ top: 0 });
     },
     [pageCursorsHistoryRef, currentPageIndexRef]
   );
