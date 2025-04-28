@@ -7,7 +7,7 @@
   "license": "UNLICENSED",
   "main": "dist/index.js",
   "scripts": {
-    "dev": "concurrently \"nest start --watch\" \"firebase serve --only functions\"",
+    "dev": "concurrently \"nest start --watch\" \"firebase emulators:start --only functions,pubsub\"",
     "build": " nest build",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "start": " nest start",

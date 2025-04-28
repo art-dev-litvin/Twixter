@@ -3,8 +3,7 @@ import { useFormik } from "formik";
 import { postFormSchema, PostFormFields } from "./schema";
 import FormField from "../FormField";
 import Button from "../Button";
-import { uploadImageFileToFirebase } from "../../utils/uploadImageFileToFirebase";
-import { handleResultWithToast } from "../../utils/handleResultWithToast";
+import { handleUploadImagePost } from "../../utils/handleUploadImagePost";
 
 interface PostFormProps {
   operation: "update" | "create";
@@ -59,25 +58,18 @@ function PostForm({
   });
 
   const onChangeImage = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.currentTarget.files?.[0];
-    const path = `posts/images/${crypto.randomUUID()}`;
+    const imageFile = event.currentTarget.files?.[0];
+    const imagePath = `posts/images/${crypto.randomUUID()}`;
 
     setIsLoadingImage(true);
 
-    if (file) {
-      //const oldNewPostImagePath = localStorage.getItem("newPostImagePath");
-
-      //if (oldNewPostImagePath) {
-      //  await removeImageFileFromFirebase(oldNewPostImagePath);
-      //}
-
-      const result = await uploadImageFileToFirebase({ file, path });
-
-      const data = handleResultWithToast(result);
+    if (imageFile) {
+      const data = await handleUploadImagePost({
+        imageFile,
+        imagePath,
+      });
 
       if (data) {
-        //localStorage.setItem("newPostImageUrl", data.imageUrl);
-
         formik.setFieldValue("imageUrl", data.imageUrl);
         formik.setFieldValue("imageId", data.imageId);
       }

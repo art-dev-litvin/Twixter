@@ -38,6 +38,14 @@ export class FirebaseService {
     }
   }
 
+  getFirestore(): admin.firestore.Firestore {
+    return this.firebaseApp.firestore();
+  }
+
+  getStorage(): admin.storage.Storage {
+    return admin.storage();
+  }
+
   getAuth = (): admin.auth.Auth => {
     return this.firebaseApp.auth();
   };

@@ -10,6 +10,7 @@ import { updateUser } from "../../services/api-requests/auth/updateUser";
 import { EditUserFieldsValues, EditUserSchema } from "./schema";
 import Avatar from "../Avatar";
 import { handleResultWithToast } from "../../utils/handleResultWithToast";
+import { uploadImageFileToFirebase } from "../../utils/uploadImageFileToFirebase";
 
 function EditUserForm() {
   const { user, setUser } = useAuth();
@@ -35,8 +36,8 @@ function EditUserForm() {
     onSubmit: async (values, { setSubmitting }) => {
       const result = await updateUser({
         username: values.username,
-        newPassword: values.newPassword?.trim() || undefined,
-        uid: user!.uid,
+        newPassword: values.newPassword || undefined,
+        userId: user!.uid,
       });
 
       setSubmitting(false);
@@ -63,6 +64,41 @@ function EditUserForm() {
     });
   }, [user, setValues]);
 
+  const onChangeAvatar = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+
+    if (files && user) {
+      const imageFile = files[0];
+      const imagePath = `users/${user.uid}/avatars/${crypto.randomUUID()}`;
+
+      setSubmitting(true);
+
+      const updatedUserImageData = await uploadImageFileToFirebase({
+        file: imageFile,
+        path: imagePath,
+      });
+
+      if (updatedUserImageData) {
+        const result = await updateUser({
+          userImageUrl: updatedUserImageData.imageUrl,
+          userId: user.uid,
+        });
+
+        const updatedUser = handleResultWithToast(result);
+
+        if (updatedUser) {
+          toast.success("Avatar has been changed!");
+
+          setUser({
+            ...updatedUser,
+          });
+        }
+      }
+
+      setSubmitting(false);
+    }
+  };
+
   if (!user) {
     return (
       <div>
@@ -70,33 +106,6 @@ function EditUserForm() {
       </div>
     );
   }
-
-  const onChangeAvatar = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files;
-
-    if (files) {
-      const newAvatar = files[0];
-
-      setSubmitting(true);
-
-      const res = await updateUser({
-        profileImage: newAvatar,
-        uid: user!.uid,
-      });
-
-      setSubmitting(false);
-
-      const updatedUser = handleResultWithToast(res);
-
-      if (updatedUser) {
-        toast.success("Avatar has been changed!");
-
-        setUser({
-          ...updatedUser,
-        });
-      }
-    }
-  };
 
   return (
     <form onSubmit={handleSubmit}>

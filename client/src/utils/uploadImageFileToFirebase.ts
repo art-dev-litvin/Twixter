@@ -1,7 +1,7 @@
 import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
-import { addDoc, collection, serverTimestamp } from "firebase/firestore";
-import { firestoreDB, storage } from "../services/firebase";
+import { storage } from "../services/firebase";
 import { runSafeAsync } from "./runSafeAsync";
+import { handleResultWithToast } from "./handleResultWithToast";
 
 export const uploadImageFileToFirebase = async ({
   file,
@@ -10,22 +10,17 @@ export const uploadImageFileToFirebase = async ({
   file: File;
   path: string;
 }) => {
-  return runSafeAsync(async () => {
+  const result = await runSafeAsync(async () => {
     const storageRef = ref(storage, path);
 
     await uploadBytes(storageRef, file);
     const imageUrl = await getDownloadURL(storageRef);
 
-    const imageDoc = await addDoc(collection(firestoreDB, "posts-images"), {
-      url: imageUrl,
-      storagePath: path,
-      createdAt: serverTimestamp(),
-      temporary: true,
-    });
-
     return {
       imageUrl: imageUrl,
-      imageId: imageDoc.id,
+      path,
     };
   });
+
+  return handleResultWithToast(result);
 };
