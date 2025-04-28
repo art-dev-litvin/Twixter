@@ -1,5 +1,6 @@
 import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
-import { storage } from "../services/firebase";
+import { addDoc, collection, serverTimestamp } from "firebase/firestore";
+import { firestoreDB, storage } from "../services/firebase";
 import { runSafeAsync } from "./runSafeAsync";
 
 export const uploadImageFileToFirebase = async ({
@@ -13,7 +14,18 @@ export const uploadImageFileToFirebase = async ({
     const storageRef = ref(storage, path);
 
     await uploadBytes(storageRef, file);
-    const downloadURL = await getDownloadURL(storageRef);
-    return downloadURL;
+    const imageUrl = await getDownloadURL(storageRef);
+
+    const imageDoc = await addDoc(collection(firestoreDB, "posts-images"), {
+      url: imageUrl,
+      storagePath: path,
+      createdAt: serverTimestamp(),
+      temporary: true,
+    });
+
+    return {
+      imageUrl: imageUrl,
+      imageId: imageDoc.id,
+    };
   });
 };

@@ -6,6 +6,7 @@ import { TPost } from 'src/types/post';
 import { UpdatePostDto } from './dtos/update-post.dto';
 import { AlgoliaService } from 'src/algolia/algolia.service';
 import { FieldPath } from 'firebase-admin/firestore';
+import { CreatePostDto } from './dtos/create-post.dto';
 
 @Injectable()
 export class PostsService {
@@ -14,36 +15,15 @@ export class PostsService {
   async createPost({
     title,
     content,
-    imageBase64,
+    imageUrl,
+    imageId,
     userId,
     userDisplayName,
     userPhotoUrl,
-  }: {
-    title: string;
-    content: string;
-    imageBase64?: string;
-
-    userId: string;
-    userDisplayName: string;
-    userPhotoUrl?: string;
-  }) {
+  }: CreatePostDto) {
     try {
-      let imageUrl: string | undefined;
-
       const newPostRef = admin.firestore().collection('posts').doc();
       const postId = newPostRef.id;
-
-      if (imageBase64) {
-        const imagePath = `posts/${postId}/image/${Date.now()}`;
-
-        const { mimeType, base64Data } = parseBase64Image(imageBase64);
-
-        imageUrl = await uploadBase64ToFirebaseStorage(
-          base64Data,
-          imagePath,
-          mimeType,
-        );
-      }
 
       const newPost: TPost = {
         id: postId,
@@ -59,6 +39,20 @@ export class PostsService {
       };
 
       await newPostRef.set(newPost);
+
+      if (imageId) {
+        const uploadedImageRef = admin
+          .firestore()
+          .collection('posts-images')
+          .doc(imageId);
+
+        console.log(uploadedImageRef);
+
+        await uploadedImageRef.update({
+          temporary: false,
+          usedInPostId: postId,
+        });
+      }
 
       return newPost;
     } catch (error) {
@@ -85,7 +79,6 @@ export class PostsService {
 
     if (searchQuery) {
       ids = await this.algoliaService.searchPosts(searchQuery, page, limit);
-      console.log(ids);
     }
 
     const query: FirebaseFirestore.Query = postsCollection;
@@ -190,7 +183,9 @@ export class PostsService {
       const { title, content, imageBase64, oldImageUrl } = updateData;
       const postRef = admin.firestore().collection('posts').doc(postId);
       const postDoc = await postRef.get();
+
       let imageUrl: string | undefined;
+
       if (!postDoc.exists) {
         throw new HttpException('Post not found', 404);
       }

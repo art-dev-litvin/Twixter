@@ -5,16 +5,11 @@ import FormField from "../FormField";
 import Button from "../Button";
 import { uploadImageFileToFirebase } from "../../utils/uploadImageFileToFirebase";
 import { handleResultWithToast } from "../../utils/handleResultWithToast";
-import { removeImageFileFromFirebase } from "../../utils/removeImageFileFromFirebase";
 
 interface PostFormProps {
   operation: "update" | "create";
-  handleSubmit: (values: PostFormFields) => Promise<void>;
-  defaultFieldValues?: {
-    title: string;
-    content: string;
-    imageUrl: string | undefined;
-  };
+  handleSubmit: (values: PostFormFields) => Promise<{} | void>;
+  defaultFieldValues?: Partial<PostFormFields>;
 }
 
 function PostForm({
@@ -23,31 +18,43 @@ function PostForm({
   defaultFieldValues,
 }: PostFormProps) {
   const imageFileInputRef = React.useRef<HTMLInputElement>(null);
+  const [isLoadingImage, setIsLoadingImage] = React.useState(false);
+
+  React.useEffect(() => {
+    return () => {
+      console.log("remove items");
+      localStorage.removeItem("newPostImageUrl");
+      localStorage.removeItem("newPostImagePath");
+    };
+  }, []);
 
   const formik = useFormik<PostFormFields>({
     initialValues: {
       title: defaultFieldValues?.title || "",
       content: defaultFieldValues?.content || "",
-      imageUrl: localStorage.getItem("newPostImageUrl") || undefined,
+      imageUrl: defaultFieldValues?.imageUrl || undefined,
+      imageId: defaultFieldValues?.imageId || undefined,
     },
     validationSchema: postFormSchema,
     onSubmit: async (values) => {
       formik.setSubmitting(true);
 
-      await handleSubmit(values);
-
-      if (operation === "create") {
-        formik.resetForm();
-        localStorage.removeItem("newPostImageUrl");
-        localStorage.removeItem("newPostImagePath");
-      }
-
-      const imageFileInput = imageFileInputRef.current;
-      if (imageFileInput) {
-        imageFileInput.value = "";
-      }
+      const res = await handleSubmit(values);
 
       formik.setSubmitting(false);
+
+      if (res) {
+        if (operation === "create") {
+          formik.resetForm();
+          localStorage.removeItem("newPostImageUrl");
+          localStorage.removeItem("newPostImagePath");
+        }
+
+        const imageFileInput = imageFileInputRef.current;
+        if (imageFileInput) {
+          imageFileInput.value = "";
+        }
+      }
     },
   });
 
@@ -55,24 +62,28 @@ function PostForm({
     const file = event.currentTarget.files?.[0];
     const path = `posts/images/${crypto.randomUUID()}`;
 
-    if (file) {
-      const oldNewPostImagePath = localStorage.getItem("newPostImagePath");
+    setIsLoadingImage(true);
 
-      if (oldNewPostImagePath) {
-        await removeImageFileFromFirebase(oldNewPostImagePath);
-      }
+    if (file) {
+      //const oldNewPostImagePath = localStorage.getItem("newPostImagePath");
+
+      //if (oldNewPostImagePath) {
+      //  await removeImageFileFromFirebase(oldNewPostImagePath);
+      //}
 
       const result = await uploadImageFileToFirebase({ file, path });
 
-      const uploadedImageUrl = handleResultWithToast(result);
+      const data = handleResultWithToast(result);
 
-      if (uploadedImageUrl) {
-        localStorage.setItem("newPostImageUrl", uploadedImageUrl);
-        localStorage.setItem("newPostImagePath", path);
+      if (data) {
+        //localStorage.setItem("newPostImageUrl", data.imageUrl);
 
-        formik.setFieldValue("imageUrl", uploadedImageUrl);
+        formik.setFieldValue("imageUrl", data.imageUrl);
+        formik.setFieldValue("imageId", data.imageId);
       }
     }
+
+    setIsLoadingImage(false);
   };
 
   return (
@@ -109,13 +120,6 @@ function PostForm({
 
       <FormField>
         <FormField.Label htmlFor="imageBase64">Image</FormField.Label>
-        {operation === "update" && defaultFieldValues?.imageUrl && (
-          <img
-            className="h-40 w-full object-cover rounded-xl my-2 border-2 border-slate-500"
-            src={defaultFieldValues?.imageUrl}
-            alt={defaultFieldValues?.title}
-          />
-        )}
         <FormField.Input
           ref={imageFileInputRef}
           type="file"
@@ -124,6 +128,10 @@ function PostForm({
           onChange={onChangeImage}
           accept="image/*"
         />
+        {isLoadingImage && (
+          <p className="mt-1 text-sm animate-pulse">Uploading image...</p>
+        )}
+
         {formik.values.imageUrl && (
           <img
             className="mt-4 w-full h-52 object-cover rounded-md"
@@ -133,7 +141,10 @@ function PostForm({
         )}
       </FormField>
       <div className="mt-4">
-        <Button fullWidth type="submit" disabled={formik.isSubmitting}>
+        <Button
+          fullWidth
+          type="submit"
+          disabled={isLoadingImage && formik.isSubmitting}>
           {formik.isSubmitting ? "Creating..." : "Submit"}
         </Button>
       </div>

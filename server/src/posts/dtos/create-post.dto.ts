@@ -11,7 +11,11 @@ export class CreatePostDto {
 
   @IsOptional()
   @IsString()
-  imageBase64?: string;
+  imageUrl?: string;
+
+  @IsOptional()
+  @IsString()
+  imageId?: string;
 
   @IsString()
   @IsNotEmpty()

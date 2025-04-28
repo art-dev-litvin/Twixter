@@ -9,7 +9,7 @@ export const createPost = (values: PostFormFields): ApiResponse<TPost> => {
   const user = auth?.currentUser;
   if (!user) return Promise.resolve({ error: "You are not authenticated" });
 
-  const { title, content, imageBase64 } = values;
+  const { title, content, imageUrl, imageId } = values;
   const { displayName, photoURL, uid } = user;
 
   return apiRequest<TPost>({
@@ -18,7 +18,8 @@ export const createPost = (values: PostFormFields): ApiResponse<TPost> => {
     data: {
       title,
       content,
-      imageBase64,
+      imageUrl,
+      imageId,
       userId: uid,
       userDisplayName: displayName || "Username",
       userPhotoUrl: photoURL || undefined,

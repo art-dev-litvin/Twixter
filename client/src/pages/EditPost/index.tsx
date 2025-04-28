@@ -37,19 +37,13 @@ function EditPost() {
   }, [params]);
 
   const handleSubmit = async (values: PostFormFields) => {
-    console.log("old image", post?.imageUrl);
-    console.log({
-      ...values,
-      oldImageUrl: post?.imageUrl,
-    });
-    const res = await updatePost(post!.id, {
-      ...values,
-      oldImageUrl: post?.imageUrl,
-    });
+    const res = await updatePost(post!.id, values);
 
     if (handleResultWithToast(res)) {
       toast.success("Post updated!");
       navigate(routes.home);
+
+      return {};
     }
   };
 

@@ -24,6 +24,8 @@ function NewPost() {
       toast.success("Post created!");
       setShouldUpdatePosts(true);
       setOpenPopup(false);
+
+      return {};
     }
   };
 
@@ -35,7 +37,13 @@ function NewPost() {
         <h3 className="text-2xl font-semibold text-center mb-4">
           Create new post
         </h3>
-        <PostForm operation="create" handleSubmit={handleSubmit} />
+        <PostForm
+          defaultFieldValues={{
+            imageUrl: localStorage.getItem("newPostImageUrl") || undefined,
+          }}
+          operation="create"
+          handleSubmit={handleSubmit}
+        />
       </Popup>
     </>
   );
