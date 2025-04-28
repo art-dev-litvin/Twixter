@@ -41,6 +41,6 @@ export const api = onRequest({ maxInstances: 1 }, async (request, response) => {
 });
 
 export const scheduledDeleteTemporaryImages = onSchedule(
-  'every 2 minutes',
+  'every 24 hours',
   deleteTemporaryImages,
 );

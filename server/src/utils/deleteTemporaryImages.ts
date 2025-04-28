@@ -12,7 +12,7 @@ export const deleteTemporaryImages = async () => {
   const bucket = firebaseService.getStorage().bucket();
 
   const now = Date.now();
-  const cutoff = new Date(now - 2 * 60 * 1000);
+  const cutoff = new Date(now - 24 * 60 * 60 * 1000);
 
   const snapshot = await db
     .collection('posts-images')
